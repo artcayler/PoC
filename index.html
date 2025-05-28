@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Building Wind Analysis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* bg-gray-100 */
+            /* Add padding to the top to prevent content from being hidden by fixed header if needed,
+               but 'sticky' usually handles this. If issues, uncomment and adjust. */
+            /* padding-top: 60px; */ /* Adjust based on actual header height */
+        }
+        .tab-button {
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+            color: #d1d5db; /* gray-400 for inactive desktop tabs */
+        }
+        .tab-button:hover {
+            color: #ffffff; /* white */
+            border-bottom-color: #4b5563; /* gray-600 */
+        }
+        .tab-button.active-tab {
+            color: #ffffff; /* white */
+            border-bottom-color: #4f46e5; /* indigo-600 */
+            font-weight: 600;
+        }
+        .tab-link {
+            display: block;
+            padding: 0.75rem 1rem;
+            color: #d1d5db; /* gray-400 */
+            text-decoration: none;
+        }
+        .tab-link:hover, .tab-link.active-tab-mobile {
+            background-color: #4b5563; /* gray-600 */
+            color: #ffffff; /* white */
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        #resultsSection:not(.loaded) { /* API results in Data Input */
+            display: none;
+        }
+        .input-section h3, #flatRoofContent h3 { /* Section headings */
+            font-size: 1.125rem; /* text-lg */
+            font-weight: 600; /* font-semibold */
+            color: #374151; /* text-gray-700 */
+            margin-bottom: 1rem; /* mb-4 */
+            border-bottom: 1px solid #e5e7eb; /* border-gray-200 */
+            padding-bottom: 0.5rem; /* pb-2 */
+        }
+        .form-field-grid {
+            display: grid;
+            grid-template-columns: repeat(1, minmax(0, 1fr));
+            gap: 1.5rem; /* gap-6 */
+        }
+        @media (min-width: 768px) { /* md breakpoint */
+            .form-field-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+        .calculated-field {
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            background-color: #eef2ff; /* indigo-50 */
+            border-left: 3px solid #6366f1; /* indigo-500 */
+            font-size: 0.875rem; /* text-sm */
+        }
+        .calculated-field .value {
+            font-weight: 600;
+            color: #4338ca; /* indigo-700 */
+        }
+        .calculated-field .info {
+            margin-top: 0.25rem;
+            color: #4f46e5; /* indigo-600 */
+        }
+        /* Table styling */
+        .results-table {
+            width: 100%;
+            margin-top: 1rem; /* mt-4 */
+            border-collapse: collapse;
+            font-size: 0.875rem; /* text-sm */
+        }
+        .results-table th, .results-table td {
+            border: 1px solid #d1d5db; /* border-gray-300 */
+            padding: 0.75rem; /* p-3 */
+            text-align: left;
+        }
+        .results-table th {
+            background-color: #f3f4f6; /* bg-gray-100 */
+            font-weight: 600; /* font-semibold */
+            color: #374151; /* text-gray-700 */
+        }
+        .results-table td.row-title {
+            font-weight: 500; /* font-medium */
+            color: #4b5563; /* text-gray-600 */
+        }
+        .results-table td { /* Default for data cells */
+            text-align: right; 
+        }
+        .results-table td.row-title, .results-table td.full-width-select { /* Override for title cells and select cell */
+            text-align: left;
+        }
+        .results-table select {
+            min-width: 80px; 
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem; /* rounded-md */
+            border: 1px solid #d1d5db; /* border-gray-300 */
+        }
+        /* Dynamic cell coloring */
+        .result-pass {
+            background-color: #dcfce7; /* green-100 */
+            color: #166534; /* green-800 */
+        }
+        .result-fail {
+            background-color: #fee2e2; /* red-100 */
+            color: #991b1b; /* red-800 */
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col"> 
+
+    <header class="bg-gray-800 text-white shadow-md sticky top-0 z-50"> 
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <h1 class="text-xl font-bold">Building Wind Analysis</h1>
+            <button id="mobileMenuButton" class="md:hidden p-2 rounded hover:bg-gray-700 focus:outline-none focus:bg-gray-700">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                </svg>
+            </button>
+            <nav id="desktopNav" class="hidden md:flex space-x-1">
+                <button class="tab-button active-tab" data-tab="dataInputContent">Data Input</button>
+                <button class="tab-button" data-tab="flatRoofContent">Flat Roof</button>
+                <button class="tab-button" data-tab="settingsContent">Settings</button>
+            </nav>
+        </div>
+        <nav id="mobileNav" class="md:hidden hidden bg-gray-700 pb-2">
+            <a href="#" class="tab-link active-tab-mobile" data-tab="dataInputContent">Data Input</a>
+            <a href="#" class="tab-link" data-tab="flatRoofContent">Flat Roof</a>
+            <a href="#" class="tab-link" data-tab="settingsContent">Settings</a>
+        </nav>
+    </header>
+
+    <main class="container mx-auto p-4 flex-grow"> 
+        <div id="dataInputContent" class="tab-content">
+            <div class="bg-white p-6 md:p-8 rounded-lg shadow-lg w-full max-w-3xl mx-auto">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-8 text-center">Project, Site & Building Data</h2>
+                <section class="input-section mb-8">
+                    <h3>Site & Location</h3>
+                    <form id="siteApiForm">
+                        <div class="form-field-grid">
+                            <div>
+                                <label for="postcode" class="block text-sm font-medium text-gray-700 mb-1">Postcode</label>
+                                <input type="text" id="postcode" name="postcode"
+                                       class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                       placeholder="e.g., SW1A 1AA" required>
+                            </div>
+                            <div>
+                                <label for="buildingHeight" class="block text-sm font-medium text-gray-700 mb-1">Overall Building Height (m)</label>
+                                <input type="number" id="buildingHeight" name="buildingHeight" step="0.001" min="0.001"
+                                       class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                       placeholder="e.g., 25.750" required>
+                            </div>
+                        </div>
+                        <div class="mt-6">
+                            <button type="submit" id="submitSiteDataButton"
+                                    class="w-full md:w-auto flex items-center justify-center py-3 px-6 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-150">
+                                Fetch Site Data
+                            </button>
+                        </div>
+                    </form>
+                    <div id="responseMessage" class="mt-6 text-center text-sm"></div>
+                    <div id="loadingSpinner" class="loader" style="display: none;"></div>
+                </section>
+
+                <form id="buildingDetailsForm">
+                    <section class="input-section mb-8">
+                        <h3>Building Dimensions</h3>
+                        <div class="form-field-grid">
+                            <div>
+                                <label for="shorterDimension" class="block text-sm font-medium text-gray-700 mb-1">Shorter Plan Dimension (m)</label>
+                                <input type="number" id="shorterDimension" name="shorterDimension" step="0.001" min="0"
+                                       class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                       placeholder="e.g., 10.500">
+                            </div>
+                            <div>
+                                <label for="longerDimension" class="block text-sm font-medium text-gray-700 mb-1">Longer Plan Dimension (m)</label>
+                                <input type="number" id="longerDimension" name="longerDimension" step="0.001" min="0"
+                                       class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                       placeholder="e.g., 20.250">
+                            </div>
+                            <div>
+                                <label for="parapetHeight" class="block text-sm font-medium text-gray-700 mb-1">Parapet Height (m) (if any)</label>
+                                <input type="number" id="parapetHeight" name="parapetHeight" step="0.001" min="0"
+                                       class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                       placeholder="e.g., 0.000 or 1.200">
+                                <div id="parapetRatioDisplay" class="calculated-field" style="display: none;">
+                                    Parapet Ratio: <span class="value">-</span>
+                                    <div class="info" id="parapetVariableInfo"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    <section class="input-section mb-8">
+                        <h3>Substrate Information</h3>
+                        <div class="form-field-grid">
+                            <div>
+                                <label for="airPermeability" class="block text-sm font-medium text-gray-700 mb-1">Air Permeability Confirmed?</label>
+                                <select id="airPermeability" name="airPermeability"
+                                        class="mt-1 block w-full px-4 py-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                    <option value="">Select...</option>
+                                    <option value="true">Yes</option>
+                                    <option value="false">No</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="dominantOpening" class="block text-sm font-medium text-gray-700 mb-1">Dominant Opening Present?</label>
+                                <select id="dominantOpening" name="dominantOpening"
+                                        class="mt-1 block w-full px-4 py-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                    <option value="">Select...</option>
+                                    <option value="true">Yes</option>
+                                    <option value="false">No</option>
+                                </select>
+                            </div>
+                        </div>
+                    </section>
+                    <section class="input-section mb-8">
+                        <h3>Structural Deck</h3>
+                        <div class="form-field-grid">
+                             <div>
+                                <label for="structuralDeckType" class="block text-sm font-medium text-gray-700 mb-1">Structural Deck Type</label>
+                                <select id="structuralDeckType" name="structuralDeckType"
+                                        class="mt-1 block w-full px-4 py-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                    <option value="">Select type...</option>
+                                    <option value="concrete">Concrete</option>
+                                    <option value="metal">Metal</option>
+                                    <option value="timber">Timber</option>
+                                    <option value="other">Other (Specify)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </section>
+                </form>
+
+                <div id="resultsSection" class="mt-10">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-4 border-b border-gray-200 pb-2">Site API Results</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3 text-sm">
+                        <div><strong>API Status:</strong> <span id="resApiStatus">-</span></div>
+                        <div><strong>Site Altitude (m):</strong> <span id="resSiteAltitude">-</span></div>
+                        <div><strong>Distance To Sea (km):</strong> <span id="resDistanceToSea">-</span></div>
+                        <div><strong>Distance Inside Town (km):</strong> <span id="resDistanceInsideTown">-</span></div>
+                        <div><strong>Building Height (API) (m):</strong> <span id="resBuildingHeightApi">-</span></div>
+                        <div><strong>Effective/Calc Height (m):</strong> <span id="resEffectiveCalcHeight">-</span></div>
+                        <div><strong>Basic Wind Speed (m/s):</strong> <span id="resBasicWindSpeed">-</span></div>
+                        <div><strong>Altitude Factor (Sa):</strong> <span id="resAltitudeFactor">-</span></div>
+                        <div><strong>Directional Factor (Sdir):</strong> <span id="resDirectionalFactor">-</span></div>
+                        <div><strong>Seasonal Factor (Ss):</strong> <span id="resSeasonalFactor">-</span></div>
+                        <div><strong>Probability Factor (Sp):</strong> <span id="resProbabilityFactor">-</span></div>
+                        <div><strong>Orography Factor (So):</strong> <span id="resOrographyFactor">-</span></div>
+                        <div><strong>Exposure Factor (Ce(z)):</strong> <span id="resExposureFactor">-</span></div>
+                        <div><strong>Exposure Correction Factor (Cexp):</strong> <span id="resExposureCorrectionFactor">-</span></div>
+                        <div><strong>Peak Velocity Pressure (qp(z), kPa):</strong> <span id="resPeakVelocityPressure">-</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="flatRoofContent" class="tab-content hidden">
+            <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-4xl mx-auto">
+                <h2 class="text-2xl font-semibold text-gray-700 mb-6">Flat Roof Analysis</h2>
+                
+                <section class="mb-10">
+                    <h3>General values</h3>
+                    <div class="overflow-x-auto">
+                        <table class="results-table min-w-full">
+                            <thead>
+                                <tr>
+                                    <th></th> 
+                                    <th>Zone F</th>
+                                    <th>Zone G</th>
+                                    <th>Zone H</th>
+                                    <th>Zone I</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="row-title">External pressure (Cpe)</td>
+                                    <td id="gen_cpe_F">-2.0</td>
+                                    <td id="gen_cpe_G">-1.4</td>
+                                    <td id="gen_cpe_H">-0.7</td>
+                                    <td id="gen_cpe_I">-0.2</td>
+                                </tr>
+                                <tr>
+                                    <td class="row-title">Internal pressure (Cpi)</td>
+                                    <td id="gen_cpi_F">0.2</td>
+                                    <td id="gen_cpi_G">0.2</td>
+                                    <td id="gen_cpi_H">0.2</td>
+                                    <td id="gen_cpi_I">0.2</td>
+                                </tr>
+                                <tr>
+                                    <td class="row-title">Factor of Safety (FoS)</td>
+                                    <td colspan="4" class="full-width-select">
+                                        <select id="factorOfSafetySelect" class="px-2 py-1 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm w-auto">
+                                            <option value="1.35" selected>1.35</option>
+                                            <option value="1.5">1.5</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="row-title">Result (Net Design Pressure kN/m²)</td>
+                                    <td id="gen_resultPressure_F">-</td>
+                                    <td id="gen_resultPressure_G">-</td>
+                                    <td id="gen_resultPressure_H">-</td>
+                                    <td id="gen_resultPressure_I">-</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section class="mb-10">
+                    <h3>Fully bonded system</h3>
+                    <div class="overflow-x-auto">
+                        <table class="results-table min-w-full">
+                             <thead>
+                                <tr>
+                                    <th></th> 
+                                    <th>Zone F</th>
+                                    <th>Zone G</th>
+                                    <th>Zone H</th>
+                                    <th>Zone I</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="row-title">Maximum allowed (kN/m²)</td>
+                                    <td id="fb_maxAllowed_F">3.00</td>
+                                    <td id="fb_maxAllowed_G">3.00</td>
+                                    <td id="fb_maxAllowed_H">3.00</td>
+                                    <td id="fb_maxAllowed_I">3.00</td>
+                                </tr>
+                                <tr>
+                                    <td class="row-title">Result (Net Design Pressure kN/m²)</td>
+                                    <td id="fb_resultPressure_F">-</td>
+                                    <td id="fb_resultPressure_G">-</td>
+                                    <td id="fb_resultPressure_H">-</td>
+                                    <td id="fb_resultPressure_I">-</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section>
+                    <h3>Permatec ballasted system</h3>
+                    <div class="overflow-x-auto">
+                        <table class="results-table min-w-full">
+                             <thead>
+                                <tr>
+                                    <th></th> 
+                                    <th>Zone F</th>
+                                    <th>Zone G</th>
+                                    <th>Zone H</th>
+                                    <th>Zone I</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="row-title">Ballast weight required (kg/m²)</td>
+                                    <td id="ballastWeight_F">-</td>
+                                    <td id="ballastWeight_G">-</td>
+                                    <td id="ballastWeight_H">-</td>
+                                    <td id="ballastWeight_I">-</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <div id="settingsContent" class="tab-content hidden">
+            <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-2xl mx-auto">
+                <h2 class="text-2xl font-semibold text-gray-700 mb-4">Application Settings</h2>
+                <p class="text-gray-600">Static data and configuration parameters will be managed here. This section is currently a placeholder.</p>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-gray-700 text-gray-300 text-center p-4 mt-auto"> 
+        <p>&copy; <span id="currentYear"></span> Cayler. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Helper function to format numbers
+        const formatNumber = (valueStr, decimalPlaces, defaultValue = "-") => {
+            const parsed = parseFloat(valueStr);
+            if (!isNaN(parsed)) {
+                return parsed.toFixed(decimalPlaces);
+            }
+            return defaultValue; 
+        };
+
+        // Tab Navigation Logic
+        const mobileMenuButton = document.getElementById('mobileMenuButton');
+        const mobileNav = document.getElementById('mobileNav');
+        const tabTriggers = document.querySelectorAll('.tab-button, .tab-link'); 
+        const tabContents = document.querySelectorAll('.tab-content');
+        const desktopTabButtons = document.querySelectorAll('.tab-button');
+        const mobileTabLinks = document.querySelectorAll('.tab-link');
+
+        mobileMenuButton.addEventListener('click', () => {
+            mobileNav.classList.toggle('hidden');
+        });
+
+        tabTriggers.forEach(trigger => {
+            trigger.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetTabId = trigger.getAttribute('data-tab');
+                tabContents.forEach(content => content.classList.add('hidden'));
+                const targetContent = document.getElementById(targetTabId);
+                if (targetContent) targetContent.classList.remove('hidden');
+                desktopTabButtons.forEach(btn => {
+                    btn.classList.remove('active-tab');
+                    if (btn.getAttribute('data-tab') === targetTabId) btn.classList.add('active-tab');
+                });
+                mobileTabLinks.forEach(link => {
+                    link.classList.remove('active-tab-mobile');
+                     if (link.getAttribute('data-tab') === targetTabId) link.classList.add('active-tab-mobile');
+                });
+                if (!mobileNav.classList.contains('hidden')) mobileNav.classList.add('hidden');
+            });
+        });
+        
+        // Store for flat roof calculation parameters
+        const flatRoofParams = {
+            coefficients: { 
+                F: -2.0, G: -1.4, H: -0.7, I: -0.2 
+            },
+            internalPressureCoefficient: 0.2, 
+            zones: ['F', 'G', 'H', 'I']
+        };
+
+        const factorOfSafetySelect = document.getElementById('factorOfSafetySelect');
+
+        // Function to calculate and update flat roof results table
+        function calculateAndUpdateFlatRoofTable() {
+            const peakVelocityPressureText = document.getElementById('resPeakVelocityPressure')?.textContent;
+            const peakVelocityPressure = parseFloat(peakVelocityPressureText);
+            const selectedFactorOfSafety = parseFloat(factorOfSafetySelect.value);
+            const cpi = flatRoofParams.internalPressureCoefficient;
+
+            flatRoofParams.zones.forEach(zone => {
+                document.getElementById(`gen_resultPressure_${zone}`).textContent = '-';
+                const fbResultCell = document.getElementById(`fb_resultPressure_${zone}`);
+                fbResultCell.textContent = '-';
+                fbResultCell.classList.remove('result-pass', 'result-fail');
+                document.getElementById(`ballastWeight_${zone}`).textContent = '-';
+                document.getElementById(`gen_cpe_${zone}`).textContent = flatRoofParams.coefficients[zone].toFixed(1);
+                document.getElementById(`gen_cpi_${zone}`).textContent = cpi.toFixed(1);
+            });
+
+            if (isNaN(peakVelocityPressure) || isNaN(selectedFactorOfSafety)) {
+                return; 
+            }
+
+            flatRoofParams.zones.forEach(zone => {
+                const cpe = flatRoofParams.coefficients[zone];
+                const externalPressureComponent = peakVelocityPressure * cpe;
+                const internalPressureComponent = peakVelocityPressure * cpi;
+                const pressureBeforeFoS = externalPressureComponent - internalPressureComponent;
+                const netDesignPressure = pressureBeforeFoS * selectedFactorOfSafety;
+                
+                document.getElementById(`gen_resultPressure_${zone}`).textContent = formatNumber(netDesignPressure, 2);
+
+                const fbResultCell = document.getElementById(`fb_resultPressure_${zone}`);
+                const fbMaxAllowed = parseFloat(document.getElementById(`fb_maxAllowed_${zone}`).textContent);
+                fbResultCell.textContent = formatNumber(netDesignPressure, 2); 
+
+                if (!isNaN(netDesignPressure) && !isNaN(fbMaxAllowed)) {
+                    if (Math.abs(netDesignPressure) <= fbMaxAllowed) {
+                        fbResultCell.classList.add('result-pass');
+                    } else {
+                        fbResultCell.classList.add('result-fail');
+                    }
+                }
+
+                let ballastWeight = netDesignPressure * -100 / 3; 
+                let displayBallastWeight;
+                if (isNaN(ballastWeight)) {
+                    displayBallastWeight = '-';
+                } else if (ballastWeight < 80) {
+                    displayBallastWeight = (80).toFixed(0); 
+                } else {
+                    displayBallastWeight = ballastWeight.toFixed(0); 
+                }
+                document.getElementById(`ballastWeight_${zone}`).textContent = displayBallastWeight;
+            });
+        }
+
+        factorOfSafetySelect.addEventListener('change', calculateAndUpdateFlatRoofTable);
+
+        // API Call and Form Logic
+        document.getElementById('siteApiForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const postcode = document.getElementById('postcode').value;
+            const overallBuildingHeight = document.getElementById('buildingHeight').value;
+            const responseMessageDiv = document.getElementById('responseMessage');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const resultsSection = document.getElementById('resultsSection'); 
+            const submitButton = document.getElementById('submitSiteDataButton');
+
+            responseMessageDiv.textContent = '';
+            resultsSection.classList.remove('loaded'); 
+            loadingSpinner.style.display = 'block';
+            submitButton.disabled = true;
+            submitButton.classList.add('opacity-50', 'cursor-not-allowed');
+
+            const resultFields = [
+                "resApiStatus", "resSiteAltitude", "resDistanceToSea", "resDistanceInsideTown",
+                "resBuildingHeightApi", "resEffectiveCalcHeight", "resBasicWindSpeed", "resAltitudeFactor",
+                "resDirectionalFactor", "resSeasonalFactor", "resProbabilityFactor", "resOrographyFactor",
+                "resExposureFactor", "resExposureCorrectionFactor", "resPeakVelocityPressure"
+            ];
+            resultFields.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = '-';
+            });
+            calculateAndUpdateFlatRoofTable(); 
+
+            if (!postcode || !overallBuildingHeight) {
+                responseMessageDiv.textContent = 'Please fill in Postcode and Overall Building Height for Site Data.';
+                responseMessageDiv.className = 'mt-6 text-center text-sm text-red-600';
+                loadingSpinner.style.display = 'none';
+                submitButton.disabled = false;
+                submitButton.classList.remove('opacity-50', 'cursor-not-allowed');
+                return;
+            }
+
+            const apiKey = "02CCE87B-72B4-4EFD-99EA-1C4DE674DAF8"; 
+
+            try {
+                const apiRequestUrl = `https://velventi.cadsglobal.com/api/v1.1/fetch/BasicReport?apiKey=${apiKey}&rf=xml&bh=${overallBuildingHeight}&pc=${encodeURIComponent(postcode)}`;
+                const velventiResponse = await fetch(apiRequestUrl);
+
+                if (!velventiResponse.ok) {
+                    let errorDetail = `HTTP error! status: ${velventiResponse.status} ${velventiResponse.statusText}`;
+                     try {
+                        const errorXmlText = await velventiResponse.text();
+                        const errorParser = new DOMParser();
+                        const errorXmlDoc = errorParser.parseFromString(errorXmlText, "application/xml");
+                        const serviceErrorNode = errorXmlDoc.querySelector("ServiceStatus Error");
+                        if (serviceErrorNode && serviceErrorNode.textContent && serviceErrorNode.textContent.trim() !== "") {
+                            errorDetail = `API Error: ${serviceErrorNode.textContent.trim()}`;
+                        }
+                    } catch (e) { /* Ignore */ }
+                    throw new Error(errorDetail);
+                }
+
+                const xmlText = await velventiResponse.text();
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(xmlText, "application/xml");
+
+                const getText = (xml, query, defaultValue = "-") => {
+                    const node = xml.querySelector(query);
+                    if (query === "ServiceStatus Error") {
+                         return node && node.textContent && node.textContent.trim() !== "" ? node.textContent.trim() : "OK";
+                    }
+                    return node && node.textContent && node.textContent.trim() !== "" ? node.textContent.trim() : defaultValue;
+                };
+                
+                const apiStatus = getText(xmlDoc, "ServiceStatus Error");
+                document.getElementById('resApiStatus').textContent = apiStatus;
+
+                if (apiStatus !== "OK" && !xmlDoc.querySelector("SiteInformation")) {
+                     responseMessageDiv.textContent = `API Error: ${apiStatus}`;
+                     responseMessageDiv.className = 'mt-6 text-center text-sm text-red-600';
+                } else {
+                    document.getElementById('resSiteAltitude').textContent = formatNumber(getText(xmlDoc, "SiteInformation SiteAltitude Value", "0"), 0);
+                    document.getElementById('resDistanceToSea').textContent = formatNumber(getText(xmlDoc, "DistanceToSea Value", "0"), 3);
+                    document.getElementById('resDistanceInsideTown').textContent = formatNumber(getText(xmlDoc, "DistanceInsideTown Value", "0"), 3);
+                    const buildingHeightApiValText = getText(xmlDoc, "BuildingHeight Value");
+                    document.getElementById('resBuildingHeightApi').textContent = formatNumber(buildingHeightApiValText, 3);
+                    document.getElementById('resBasicWindSpeed').textContent = formatNumber(getText(xmlDoc, "SiteInformation BasicWindSpeed Value"), 3);
+                    document.getElementById('resAltitudeFactor').textContent = formatNumber(getText(xmlDoc, "AltitudeFactor Value"), 3);
+                    document.getElementById('resDirectionalFactor').textContent = formatNumber(getText(xmlDoc, "DirectionalFactor Value"), 3);
+                    document.getElementById('resSeasonalFactor').textContent = formatNumber(getText(xmlDoc, "SiteInformation SeasonalFactor Value"), 3);
+                    document.getElementById('resProbabilityFactor').textContent = formatNumber(getText(xmlDoc, "SiteInformation ProbabilityFactor Value"), 3);
+                    document.getElementById('resOrographyFactor').textContent = formatNumber(getText(xmlDoc, "OrographyFactor Value"), 3);
+                    document.getElementById('resExposureFactor').textContent = formatNumber(getText(xmlDoc, "ExposureFactor Value"), 3);
+                    const exposureCorrectionFactorValText = getText(xmlDoc, "ExposureCorrectionFactor Value", "1");
+                    document.getElementById('resExposureCorrectionFactor').textContent = formatNumber(exposureCorrectionFactorValText, 3);
+                    const peakVelocityPressureValText = getText(xmlDoc, "PeakVelocityPressure Value");
+                    document.getElementById('resPeakVelocityPressure').textContent = formatNumber(peakVelocityPressureValText, 3);
+
+                    if (parseFloat(exposureCorrectionFactorValText) === 1.0) {
+                        document.getElementById('resEffectiveCalcHeight').textContent = formatNumber(buildingHeightApiValText, 3); 
+                    } else {
+                        document.getElementById('resEffectiveCalcHeight').textContent = formatNumber(getText(xmlDoc, "EffectiveHeight Value"), 3);
+                    }
+                    
+                    responseMessageDiv.textContent = 'Site data fetched successfully!';
+                    responseMessageDiv.className = 'mt-6 text-center text-sm text-green-600';
+                    resultsSection.classList.add('loaded'); 
+                    
+                    calculateAndUpdateFlatRoofTable();
+                }
+            } catch (error) {
+                console.error('Operation Error:', error);
+                responseMessageDiv.textContent = `${error.message}`; 
+                responseMessageDiv.className = 'mt-6 text-center text-sm text-red-600';
+                resultsSection.classList.remove('loaded'); 
+            } finally {
+                loadingSpinner.style.display = 'none';
+                submitButton.disabled = false;
+                submitButton.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        });
+
+        // Parapet Calculation Logic
+        const buildingHeightInput = document.getElementById('buildingHeight');
+        const parapetHeightInput = document.getElementById('parapetHeight');
+        const parapetRatioDisplayDiv = document.getElementById('parapetRatioDisplay');
+        const parapetRatioValueSpan = parapetRatioDisplayDiv.querySelector('.value');
+        const parapetVariableInfoDiv = document.getElementById('parapetVariableInfo');
+
+        function calculateAndDisplayParapetRatio() {
+            const bhValue = parseFloat(buildingHeightInput.value);
+            const phValue = parseFloat(parapetHeightInput.value);
+
+            if (isNaN(phValue) || phValue < 0) {
+                parapetRatioDisplayDiv.style.display = 'none';
+                parapetRatioValueSpan.textContent = '-';
+                parapetVariableInfoDiv.textContent = '';
+                return;
+            }
+            if (isNaN(bhValue) || bhValue <= 0) {
+                parapetRatioDisplayDiv.style.display = 'block';
+                parapetRatioValueSpan.textContent = 'N/A';
+                parapetVariableInfoDiv.textContent = 'Valid Building Height required for ratio.';
+                return;
+            }
+
+            parapetRatioDisplayDiv.style.display = 'block';
+            const ratio = phValue / bhValue;
+            parapetRatioValueSpan.textContent = ratio.toFixed(2);
+
+            if (ratio < 0.05) {
+                parapetVariableInfoDiv.textContent = "Parapet height insignificant";
+            } else if (ratio >= 0.05 && ratio < 0.1) {
+                parapetVariableInfoDiv.textContent = "Parapet variable = 0.05";
+            } else if (ratio >= 0.1 && ratio < 0.2) {
+                parapetVariableInfoDiv.textContent = "Parapet variable = 0.1";
+            } else if (ratio >= 0.2) {
+                parapetVariableInfoDiv.textContent = "Parapet variable = 0.2";
+            } else {
+                parapetVariableInfoDiv.textContent = "";
+            }
+        }
+        buildingHeightInput.addEventListener('input', calculateAndDisplayParapetRatio);
+        parapetHeightInput.addEventListener('input', calculateAndDisplayParapetRatio);
+
+        // Initial DOMContentLoaded setup
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('currentYear').textContent = new Date().getFullYear(); // Set current year in footer
+
+            const defaultTabId = 'dataInputContent';
+            const defaultDesktopTab = document.querySelector(`.tab-button[data-tab="${defaultTabId}"]`);
+            const defaultMobileLink = document.querySelector(`.tab-link[data-tab="${defaultTabId}"]`);
+            
+            tabContents.forEach(content => {
+                if (content.id === defaultTabId) {
+                    content.classList.remove('hidden');
+                } else {
+                    content.classList.add('hidden');
+                }
+            });
+            if (defaultDesktopTab) defaultDesktopTab.classList.add('active-tab');
+            if (defaultMobileLink) defaultMobileLink.classList.add('active-tab-mobile');
+            
+            calculateAndDisplayParapetRatio();
+            calculateAndUpdateFlatRoofTable(); 
+        });
+
+    </script>
+</body>
+</html>
