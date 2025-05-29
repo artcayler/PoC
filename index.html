@@ -10,9 +10,6 @@
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f3f4f6; /* bg-gray-100 */
-            /* Add padding to the top to prevent content from being hidden by fixed header if needed,
-               but 'sticky' usually handles this. If issues, uncomment and adjust. */
-            /* padding-top: 60px; */ /* Adjust based on actual header height */
         }
         .tab-button {
             padding: 0.75rem 1.5rem;
@@ -56,7 +53,7 @@
         #resultsSection:not(.loaded) { /* API results in Data Input */
             display: none;
         }
-        .input-section h3, #flatRoofContent h3 { /* Section headings */
+        .input-section h3, #flatRoofContent h3, #settingsContent h3 { /* Section headings */
             font-size: 1.125rem; /* text-lg */
             font-weight: 600; /* font-semibold */
             color: #374151; /* text-gray-700 */
@@ -109,6 +106,7 @@
         .results-table td.row-title {
             font-weight: 500; /* font-medium */
             color: #4b5563; /* text-gray-600 */
+            white-space: nowrap;
         }
         .results-table td { /* Default for data cells */
             text-align: right; 
@@ -122,6 +120,14 @@
             border-radius: 0.375rem; /* rounded-md */
             border: 1px solid #d1d5db; /* border-gray-300 */
         }
+        .results-table input[type="number"].setting-input { /* Specific for settings table inputs */
+            width: 100%;
+            max-width: 100px; /* Adjust as needed for Cpe values */
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem; /* rounded-md */
+            border: 1px solid #d1d5db; /* border-gray-300 */
+            text-align: right;
+        }
         /* Dynamic cell coloring */
         .result-pass {
             background-color: #dcfce7; /* green-100 */
@@ -131,11 +137,16 @@
             background-color: #fee2e2; /* red-100 */
             color: #991b1b; /* red-800 */
         }
+        #settingsStatus {
+            margin-top: 1rem;
+            font-style: italic;
+            color: #4b5563; /* gray-600 */
+        }
     </style>
 </head>
-<body class="min-h-screen flex flex-col"> 
+<body class="min-h-screen flex flex-col">
 
-    <header class="bg-gray-800 text-white shadow-md sticky top-0 z-50"> 
+    <header class="bg-gray-800 text-white shadow-md sticky top-0 z-50">
         <div class="container mx-auto px-4 py-3 flex justify-between items-center">
             <h1 class="text-xl font-bold">Building Wind Analysis</h1>
             <button id="mobileMenuButton" class="md:hidden p-2 rounded hover:bg-gray-700 focus:outline-none focus:bg-gray-700">
@@ -156,7 +167,7 @@
         </nav>
     </header>
 
-    <main class="container mx-auto p-4 flex-grow"> 
+    <main class="container mx-auto p-4 flex-grow">
         <div id="dataInputContent" class="tab-content">
             <div class="bg-white p-6 md:p-8 rounded-lg shadow-lg w-full max-w-3xl mx-auto">
                 <h2 class="text-2xl font-semibold text-gray-800 mb-8 text-center">Project, Site & Building Data</h2>
@@ -281,9 +292,8 @@
         </div>
 
         <div id="flatRoofContent" class="tab-content hidden">
-            <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-4xl mx-auto">
+             <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-4xl mx-auto">
                 <h2 class="text-2xl font-semibold text-gray-700 mb-6">Flat Roof Analysis</h2>
-                
                 <section class="mb-10">
                     <h3>General values</h3>
                     <div class="overflow-x-auto">
@@ -300,24 +310,23 @@
                             <tbody>
                                 <tr>
                                     <td class="row-title">External pressure (Cpe)</td>
-                                    <td id="gen_cpe_F">-2.0</td>
-                                    <td id="gen_cpe_G">-1.4</td>
-                                    <td id="gen_cpe_H">-0.7</td>
-                                    <td id="gen_cpe_I">-0.2</td>
+                                    <td id="gen_cpe_F">-</td>
+                                    <td id="gen_cpe_G">-</td>
+                                    <td id="gen_cpe_H">-</td>
+                                    <td id="gen_cpe_I">-</td>
                                 </tr>
                                 <tr>
                                     <td class="row-title">Internal pressure (Cpi)</td>
-                                    <td id="gen_cpi_F">0.2</td>
-                                    <td id="gen_cpi_G">0.2</td>
-                                    <td id="gen_cpi_H">0.2</td>
-                                    <td id="gen_cpi_I">0.2</td>
+                                    <td id="gen_cpi_F">-</td>
+                                    <td id="gen_cpi_G">-</td>
+                                    <td id="gen_cpi_H">-</td>
+                                    <td id="gen_cpi_I">-</td>
                                 </tr>
                                 <tr>
                                     <td class="row-title">Factor of Safety (FoS)</td>
                                     <td colspan="4" class="full-width-select">
                                         <select id="factorOfSafetySelect" class="px-2 py-1 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm w-auto">
-                                            <option value="1.35" selected>1.35</option>
-                                            <option value="1.5">1.5</option>
+                                            {/* Options will be populated from settings */}
                                         </select>
                                     </td>
                                 </tr>
@@ -332,7 +341,6 @@
                         </table>
                     </div>
                 </section>
-
                 <section class="mb-10">
                     <h3>Fully bonded system</h3>
                     <div class="overflow-x-auto">
@@ -365,7 +373,6 @@
                         </table>
                     </div>
                 </section>
-
                 <section>
                     <h3>Permatec ballasted system</h3>
                     <div class="overflow-x-auto">
@@ -395,18 +402,48 @@
         </div>
 
         <div id="settingsContent" class="tab-content hidden">
-            <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-2xl mx-auto">
-                <h2 class="text-2xl font-semibold text-gray-700 mb-4">Application Settings</h2>
-                <p class="text-gray-600">Static data and configuration parameters will be managed here. This section is currently a placeholder.</p>
+            <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-4xl mx-auto">
+                <h2 class="text-2xl font-semibold text-gray-700 mb-6">Application Settings</h2>
+                <div id="settingsStatus" class="mb-4 text-sm"></div>
+                
+                <section class="mb-8">
+                    <h3>External Pressure Coefficients (Cpe) - Flat Roof with Parapets</h3>
+                    <div class="overflow-x-auto">
+                        <table class="results-table min-w-full" id="settingsCpeParapetsTable">
+                            <thead>
+                                <tr>
+                                    <th>Type (h<sub>p</sub>/h ratio)</th>
+                                    <th>Zone F (Cpe)</th>
+                                    <th>Zone G (Cpe)</th>
+                                    <th>Zone H (Cpe)</th>
+                                    <th>Zone I (Cpe)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {/* Rows will be populated by JavaScript */}
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+                {/* Add more settings sections/tables here as needed */}
+                <div class="mt-8 text-right">
+                    <button id="saveSettingsButton" class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 mr-2">Save Settings for Session</button>
+                    <button id="resetSettingsButton" class="px-6 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50">Reset to Defaults</button>
+                </div>
             </div>
         </div>
     </main>
 
-    <footer class="bg-gray-700 text-gray-300 text-center p-4 mt-auto"> 
+    <footer class="bg-gray-700 text-gray-300 text-center p-4 mt-auto">
         <p>&copy; <span id="currentYear"></span> Cayler. All rights reserved.</p>
     </footer>
 
     <script>
+        // --- Global Variables for Settings ---
+        let defaultAppSettings = {}; // To store data from settings.json
+        let currentAppSettings = {}; // To store currently active settings (from JSON or session)
+        const SESSION_STORAGE_KEY = 'buildingAnalysisAppSettings';
+
         // Helper function to format numbers
         const formatNumber = (valueStr, decimalPlaces, defaultValue = "-") => {
             const parsed = parseFloat(valueStr);
@@ -447,23 +484,187 @@
             });
         });
         
-        // Store for flat roof calculation parameters
-        const flatRoofParams = {
-            coefficients: { 
-                F: -2.0, G: -1.4, H: -0.7, I: -0.2 
-            },
+        // Store for flat roof calculation parameters (will be updated from settings)
+        let flatRoofParams = {
+            coefficients: { F: -2.0, G: -1.4, H: -0.7, I: -0.2 }, // Initial defaults, will be overwritten
             internalPressureCoefficient: 0.2, 
             zones: ['F', 'G', 'H', 'I']
         };
 
         const factorOfSafetySelect = document.getElementById('factorOfSafetySelect');
+        const settingsStatusDiv = document.getElementById('settingsStatus');
+
+        // --- Settings Management Functions ---
+        async function loadDefaultSettingsFromFile() {
+            try {
+                const response = await fetch('settings.json');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status} while fetching settings.json`);
+                }
+                defaultAppSettings = await response.json();
+                console.log("Default settings loaded from settings.json:", defaultAppSettings);
+            } catch (error) {
+                console.error("Error loading default settings from settings.json:", error);
+                settingsStatusDiv.textContent = "Error: Could not load default settings. Using fallback.";
+                // Fallback default settings if JSON fails to load
+                defaultAppSettings = {
+                    flatRoofCpeParapets: [
+                        { id: "no_parapet", typeDescription: "No Parapet", zones: { F: -2.00, G: -1.40, H: -0.70, I: -0.20 }},
+                        { id: "parapet_005", typeDescription: "Parapet ~0.05", zones: { F: null, G: null, H: null, I: null }},
+                        { id: "parapet_010", typeDescription: "Parapet ~0.10", zones: { F: null, G: null, H: null, I: null }},
+                        { id: "parapet_020", typeDescription: "Parapet ~0.20", zones: { F: null, G: null, H: null, I: null }}
+                    ],
+                    internalPressureCoefficient: { default_cpi: 0.2 },
+                    factorOfSafetyOptions: [1.35, 1.5],
+                    defaultFactorOfSafety: 1.35
+                };
+            }
+        }
+
+        function loadSettingsFromSession() {
+            const storedSettings = sessionStorage.getItem(SESSION_STORAGE_KEY);
+            if (storedSettings) {
+                try {
+                    currentAppSettings = JSON.parse(storedSettings);
+                    console.log("Settings loaded from session storage:", currentAppSettings);
+                    settingsStatusDiv.textContent = "Settings loaded from current session.";
+                    return true;
+                } catch (error) {
+                    console.error("Error parsing settings from session storage:", error);
+                    sessionStorage.removeItem(SESSION_STORAGE_KEY); // Clear corrupted data
+                }
+            }
+            settingsStatusDiv.textContent = "Using default settings.";
+            return false;
+        }
+
+        function populateCpeSettingsTable(settings) {
+            const tableBody = document.getElementById('settingsCpeParapetsTable').querySelector('tbody');
+            tableBody.innerHTML = ''; // Clear existing rows
+
+            if (settings.flatRoofCpeParapets && Array.isArray(settings.flatRoofCpeParapets)) {
+                settings.flatRoofCpeParapets.forEach(parapetType => {
+                    const row = tableBody.insertRow();
+                    const typeCell = row.insertCell();
+                    typeCell.textContent = parapetType.typeDescription;
+                    typeCell.className = 'row-title';
+
+                    flatRoofParams.zones.forEach(zone => {
+                        const cell = row.insertCell();
+                        const input = document.createElement('input');
+                        input.type = 'number';
+                        input.className = 'setting-input';
+                        input.id = `setting_cpe_${parapetType.id}_${zone}`;
+                        input.step = "0.01";
+                        const value = parapetType.zones[zone];
+                        input.value = (value !== null && typeof value !== 'undefined') ? parseFloat(value).toFixed(2) : '';
+                        input.placeholder = "0.00";
+                        cell.appendChild(input);
+                    });
+                });
+            }
+        }
+        
+        function populateFactorOfSafetyDropdown(settings) {
+            factorOfSafetySelect.innerHTML = ''; // Clear existing options
+            if (settings.factorOfSafetyOptions && Array.isArray(settings.factorOfSafetyOptions)) {
+                settings.factorOfSafetyOptions.forEach(fos => {
+                    const option = document.createElement('option');
+                    option.value = fos;
+                    option.textContent = fos.toFixed(2);
+                    if (fos === settings.defaultFactorOfSafety) {
+                        option.selected = true;
+                    }
+                    factorOfSafetySelect.appendChild(option);
+                });
+            }
+        }
+
+
+        function applySettingsToApp(settings) {
+            // 1. Populate UI elements in the Settings tab
+            populateCpeSettingsTable(settings);
+            populateFactorOfSafetyDropdown(settings);
+
+            // 2. Update flatRoofParams for calculations
+            // For now, always use "no_parapet" Cpe values for calculations.
+            // A more advanced implementation would select based on parapetRatio.
+            const noParapetSettings = settings.flatRoofCpeParapets.find(p => p.id === "no_parapet");
+            if (noParapetSettings) {
+                flatRoofParams.coefficients = { ...noParapetSettings.zones }; // Update Cpe values
+            }
+            flatRoofParams.internalPressureCoefficient = settings.internalPressureCoefficient?.default_cpi || 0.2;
+            
+            // Set default FoS in dropdown if it exists in options
+            if (settings.defaultFactorOfSafety && settings.factorOfSafetyOptions.includes(settings.defaultFactorOfSafety)) {
+                 factorOfSafetySelect.value = settings.defaultFactorOfSafety;
+            }
+
+
+            // 3. Recalculate tables that depend on these settings
+            calculateAndUpdateFlatRoofTable();
+        }
+
+        async function initializeSettings() {
+            await loadDefaultSettingsFromFile(); // Load from settings.json first
+            if (!loadSettingsFromSession()) { // If no session settings, use defaults
+                currentAppSettings = JSON.parse(JSON.stringify(defaultAppSettings)); // Deep copy
+            }
+            applySettingsToApp(currentAppSettings);
+        }
+
+        function saveSettingsToSession() {
+            // Read Cpe values from the settings table
+            const newCpeSettings = defaultAppSettings.flatRoofCpeParapets.map(parapetType => {
+                const updatedZones = {};
+                flatRoofParams.zones.forEach(zone => {
+                    const inputElement = document.getElementById(`setting_cpe_${parapetType.id}_${zone}`);
+                    const value = parseFloat(inputElement.value);
+                    updatedZones[zone] = isNaN(value) ? null : value;
+                });
+                return { ...parapetType, zones: updatedZones };
+            });
+
+            // Update currentAppSettings with values from the form
+            currentAppSettings.flatRoofCpeParapets = newCpeSettings;
+            currentAppSettings.defaultFactorOfSafety = parseFloat(factorOfSafetySelect.value);
+            // Add other settings as they are implemented (e.g., internalPressureCoefficient if made editable)
+
+            try {
+                sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(currentAppSettings));
+                console.log("Settings saved to session storage:", currentAppSettings);
+                settingsStatusDiv.textContent = "Settings saved for current session.";
+                applySettingsToApp(currentAppSettings); // Re-apply to update calculations
+            } catch (error) {
+                console.error("Error saving settings to session storage:", error);
+                settingsStatusDiv.textContent = "Error: Could not save settings.";
+            }
+        }
+
+        function restoreDefaultSettings() {
+            sessionStorage.removeItem(SESSION_STORAGE_KEY);
+            currentAppSettings = JSON.parse(JSON.stringify(defaultAppSettings)); // Deep copy defaults
+            console.log("Settings restored to defaults:", currentAppSettings);
+            settingsStatusDiv.textContent = "Settings restored to defaults.";
+            applySettingsToApp(currentAppSettings);
+        }
+
+        // --- End of Settings Management Functions ---
+
 
         // Function to calculate and update flat roof results table
         function calculateAndUpdateFlatRoofTable() {
             const peakVelocityPressureText = document.getElementById('resPeakVelocityPressure')?.textContent;
             const peakVelocityPressure = parseFloat(peakVelocityPressureText);
             const selectedFactorOfSafety = parseFloat(factorOfSafetySelect.value);
-            const cpi = flatRoofParams.internalPressureCoefficient;
+            
+            // Use Cpi from currentAppSettings if available, otherwise from flatRoofParams as fallback
+            const cpi = currentAppSettings.internalPressureCoefficient?.default_cpi || flatRoofParams.internalPressureCoefficient;
+
+            // Use Cpe from currentAppSettings (specifically "no_parapet" for now)
+            // This part needs to be more dynamic if we want to use other parapet settings from the table
+            const noParapetCpeSettings = currentAppSettings.flatRoofCpeParapets?.find(p => p.id === "no_parapet")?.zones || flatRoofParams.coefficients;
+
 
             flatRoofParams.zones.forEach(zone => {
                 document.getElementById(`gen_resultPressure_${zone}`).textContent = '-';
@@ -471,7 +672,9 @@
                 fbResultCell.textContent = '-';
                 fbResultCell.classList.remove('result-pass', 'result-fail');
                 document.getElementById(`ballastWeight_${zone}`).textContent = '-';
-                document.getElementById(`gen_cpe_${zone}`).textContent = flatRoofParams.coefficients[zone].toFixed(1);
+
+                // Populate General Values table with current Cpe and Cpi being used
+                document.getElementById(`gen_cpe_${zone}`).textContent = (noParapetCpeSettings[zone] !== null ? noParapetCpeSettings[zone].toFixed(1) : '-');
                 document.getElementById(`gen_cpi_${zone}`).textContent = cpi.toFixed(1);
             });
 
@@ -480,7 +683,14 @@
             }
 
             flatRoofParams.zones.forEach(zone => {
-                const cpe = flatRoofParams.coefficients[zone];
+                const cpe = noParapetCpeSettings[zone]; // Using "no_parapet" Cpe from settings
+                if (cpe === null) { // Skip if Cpe for this zone is not set
+                    document.getElementById(`gen_resultPressure_${zone}`).textContent = 'N/A (Cpe)';
+                    document.getElementById(`fb_resultPressure_${zone}`).textContent = 'N/A (Cpe)';
+                    document.getElementById(`ballastWeight_${zone}`).textContent = 'N/A (Cpe)';
+                    return;
+                }
+
                 const externalPressureComponent = peakVelocityPressure * cpe;
                 const internalPressureComponent = peakVelocityPressure * cpi;
                 const pressureBeforeFoS = externalPressureComponent - internalPressureComponent;
@@ -505,15 +715,19 @@
                 if (isNaN(ballastWeight)) {
                     displayBallastWeight = '-';
                 } else if (ballastWeight < 80) {
-                    displayBallastWeight = (80).toFixed(0); 
+                    displayBallastWeight = (80).toFixed(3); 
                 } else {
-                    displayBallastWeight = ballastWeight.toFixed(0); 
+                    displayBallastWeight = ballastWeight.toFixed(3); 
                 }
                 document.getElementById(`ballastWeight_${zone}`).textContent = displayBallastWeight;
             });
         }
 
+        // Event Listeners for Settings Buttons
+        document.getElementById('saveSettingsButton')?.addEventListener('click', saveSettingsToSession);
+        document.getElementById('resetSettingsButton')?.addEventListener('click', restoreDefaultSettings);
         factorOfSafetySelect.addEventListener('change', calculateAndUpdateFlatRoofTable);
+
 
         // API Call and Form Logic
         document.getElementById('siteApiForm').addEventListener('submit', async function(event) {
@@ -671,13 +885,18 @@
             } else {
                 parapetVariableInfoDiv.textContent = "";
             }
+            // Important: After parapet ratio changes, Cpe values might need to be re-selected from settings.
+            // For now, we are always using "no_parapet" Cpe. This would be an enhancement.
+            // calculateAndUpdateFlatRoofTable(); // Could trigger re-calc if Cpe depends on this.
         }
         buildingHeightInput.addEventListener('input', calculateAndDisplayParapetRatio);
         parapetHeightInput.addEventListener('input', calculateAndDisplayParapetRatio);
 
         // Initial DOMContentLoaded setup
-        document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('currentYear').textContent = new Date().getFullYear(); // Set current year in footer
+        document.addEventListener('DOMContentLoaded', async () => { // Made async for settings load
+            document.getElementById('currentYear').textContent = new Date().getFullYear(); 
+            
+            await initializeSettings(); // Load and apply settings
 
             const defaultTabId = 'dataInputContent';
             const defaultDesktopTab = document.querySelector(`.tab-button[data-tab="${defaultTabId}"]`);
@@ -694,7 +913,7 @@
             if (defaultMobileLink) defaultMobileLink.classList.add('active-tab-mobile');
             
             calculateAndDisplayParapetRatio();
-            calculateAndUpdateFlatRoofTable(); 
+            // calculateAndUpdateFlatRoofTable(); // Already called by initializeSettings
         });
 
     </script>
