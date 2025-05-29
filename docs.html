@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polytec - Documentation & Guides</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* bg-gray-100 */
+        }
+        /* Styles for the top menu items */
+        .top-menu-link {
+            padding: 0.75rem 1.0rem; /* Adjusted padding slightly for more items */
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+            color: #d1d5db; /* gray-400 for inactive links */
+            text-decoration: none; 
+            font-size: 0.875rem; /* text-sm for more items */
+        }
+        .top-menu-link:hover {
+            color: #ffffff; /* white */
+            border-bottom-color: #4b5563; /* gray-600 */
+        }
+        .top-menu-link.active-menu-link { /* Style for an active/current page link */
+            color: #ffffff; /* white */
+            border-bottom-color: #4f46e5; /* indigo-600 */
+            font-weight: 600;
+        }
+         /* Style for the "Portal" button to make it distinct */
+        .portal-button-nav {
+            padding: 0.65rem 1.25rem; 
+            margin-right: 0.5rem; /* Space from other items */
+            background-color: #374151; /* gray-700 */
+            color: white;
+            border: 1px solid #4b5563; /* gray-600 */
+            border-radius: 0.375rem; /* rounded-md */
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+            font-size: 0.875rem; /* text-sm */
+        }
+        .portal-button-nav:hover {
+            background-color: #4b5563; /* gray-600 */
+        }
+
+        /* Mobile menu link styling */
+        .mobile-nav-link {
+            display: block;
+            padding: 0.75rem 1rem;
+            color: #d1d5db; /* gray-400 */
+            text-decoration: none;
+        }
+        .mobile-nav-link:hover, .mobile-nav-link.active-menu-link-mobile {
+            background-color: #4b5563; /* gray-600 */
+            color: #ffffff; /* white */
+        }
+        .mobile-portal-button {
+            display: block;
+            padding: 0.75rem 1rem;
+            margin: 0.5rem 1rem;
+            background-color: #4f46e5;
+            color: white;
+            border-radius: 0.375rem;
+            text-align: center;
+            text-decoration: none;
+        }
+         .mobile-portal-button:hover {
+            background-color: #4338ca;
+        }
+        /* Styling for anchor-linked sections to account for sticky header */
+        .content-section {
+            padding-top: 70px; /* Adjust based on your sticky header's height */
+            margin-top: -70px; /* Negative margin to pull it up to the true anchor point */
+        }
+        .content-section h2 {
+            font-size: 1.75rem; /* text-2xl */
+            font-weight: 600; /* font-semibold */
+            color: #1f2937; /* text-gray-800 */
+            margin-bottom: 1rem; /* mb-4 */
+            border-bottom: 1px solid #d1d5db; /* border-gray-300 */
+            padding-bottom: 0.5rem; /* pb-2 */
+        }
+        .content-section p, .content-section ul {
+            margin-bottom: 1rem; /* mb-4 */
+            line-height: 1.6;
+            color: #4b5563; /* text-gray-600 */
+        }
+        .content-section ul {
+            list-style-type: disc;
+            margin-left: 1.5rem; /* ml-6 */
+        }
+        .content-section a.doc-link {
+            color: #4f46e5; /* indigo-600 */
+            text-decoration: underline;
+        }
+        .content-section a.doc-link:hover {
+            color: #3730a3; /* indigo-800 */
+        }
+
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <header class="bg-gray-800 text-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <h1 class="text-xl font-bold">Docs & Guides</h1> 
+            <button id="mobileMenuButton" class="md:hidden p-2 rounded hover:bg-gray-700 focus:outline-none focus:bg-gray-700">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                </svg>
+            </button>
+            <nav id="desktopNav" class="hidden md:flex items-center space-x-1"> 
+                <a href="index.html" class="portal-button-nav">Portal</a> 
+                <a href="#fire" class="top-menu-link">Fire</a>
+                <a href="#guides" class="top-menu-link">Guides</a>
+                <a href="#bulletins" class="top-menu-link">Bulletins</a>
+                <a href="#bba-certs" class="top-menu-link">BBA Certs</a>
+                <a href="#datasheets" class="top-menu-link">Datasheets</a>
+                <a href="#sds" class="top-menu-link">SDS</a>
+                <a href="#dop-portal" class="top-menu-link">DoP Portal</a>
+            </nav>
+        </div>
+        <nav id="mobileNav" class="md:hidden hidden bg-gray-700 pb-2">
+            <a href="index.html" class="mobile-portal-button">Portal</a>
+            <a href="#fire" class="mobile-nav-link">Fire</a>
+            <a href="#guides" class="mobile-nav-link">Guides</a>
+            <a href="#bulletins" class="mobile-nav-link">Bulletins</a>
+            <a href="#bba-certs" class="mobile-nav-link">BBA Certs</a>
+            <a href="#datasheets" class="mobile-nav-link">Datasheets</a>
+            <a href="#sds" class="mobile-nav-link">SDS</a>
+            <a href="#dop-portal" class="mobile-nav-link">DoP Portal</a>
+        </nav>
+    </header>
+
+    <main class="container mx-auto p-8 flex-grow"> 
+        <div class="bg-white p-8 rounded-lg shadow-lg w-full">
+            
+            <section id="fire" class="content-section mb-12">
+                <h2>Fire Documentation</h2>
+                <p>Find all relevant documents related to fire safety, testing, and compliance for our products and systems.</p>
+                <ul>
+                    <li><a href="files/fire-safety-guide.pdf" target="_blank" class="doc-link">Comprehensive Fire Safety Guide (PDF - local file)</a></li>
+                    <li><a href="https://www.gov.uk/government/collections/fire-safety-design-for-schools" target="_blank" class="doc-link">External Link: UK Gov Fire Safety Design for Schools</a></li>
+                    <li>Placeholder for another fire document.</li>
+                </ul>
+            </section>
+
+            <section id="guides" class="content-section mb-12">
+                <h2>Installation & Application Guides</h2>
+                <p>Detailed guides to help you with the correct installation and application of our products.</p>
+                 <ul>
+                    <li><a href="files/installation-manual-product-x.pdf" target="_blank" class="doc-link">Installation Manual for Product X (PDF - local file)</a></li>
+                    <li><a href="https://www.external-guides.com/best-practices" target="_blank" class="doc-link">External Link: Best Practice Installation Techniques</a></li>
+                    <li>Placeholder for another guide.</li>
+                </ul>
+            </section>
+
+            <section id="bulletins" class="content-section mb-12">
+                <h2>Technical Bulletins</h2>
+                <p>Stay updated with our latest technical bulletins, providing information on product updates, new research, and important notices.</p>
+                 <ul>
+                    <li><a href="files/Technical Bulletin SIPs May 2025 .pdf" target="_blank" class="doc-link">SIPs Technical Bulletin May 2025 (PDF - local file)</a></li>
+                    <li>Placeholder for another bulletin.</li>
+                </ul>
+            </section>
+
+            <section id="bba-certs" class="content-section mb-12">
+                <h2>BBA Certificates</h2>
+                <p>Access all current BBA (British Board of Agrément) certificates for our certified products and systems.</p>
+                 <ul>
+                    
+                    <li><a href="files/05-4287 Armourplan SM Issue 8 May 2025.pdf" target="_blank" class="doc-link">Armourplan SM May 2025 (PDF - local file)</a></li>
+		 <li><a href="files/05-4287 Armourplan P Issue 6 May 2025.pdf" target="_blank" class="doc-link">Armourplan P May 2025 (PDF - local file)</a></li>
+		 <li><a href="files/05-4287 Armourplan SG Issue 6 May 2025.pdf" target="_blank" class="doc-link">Armourplan SG May 2025 (PDF - local file)</a></li>
+		 <li><a href="files/05-4287 Armourplan PSG Issue 5 May 2025.pdf" target="_blank" class="doc-link">Armourplan PSG May 2025 (PDF - local file)</a></li>
+		<a> </a>
+		<li><a href="https://www.bbacerts.co.uk/" target="_blank" class="doc-link">External Link: Search BBA Certificates Online</a></li>
+                </ul>
+            </section>
+
+            <section id="datasheets" class="content-section mb-12">
+                <h2>Product Datasheets</h2>
+                <p>Download technical datasheets for our full range of products, detailing specifications, performance data, and application areas.</p>
+                <ul>
+                    <li><a href="files/datasheet-product-a.pdf" target="_blank" class="doc-link">Datasheet for Product A (PDF - local file)</a></li>
+                    <li><a href="files/datasheet-product-b.pdf" target="_blank" class="doc-link">Datasheet for Product B (PDF - local file)</a></li>
+                </ul>
+            </section>
+
+            <section id="sds" class="content-section mb-12">
+                <h2>Safety Datasheets (SDS)</h2>
+                <p>Find Safety Datasheets for our chemical products, providing information on safe handling, storage, and emergency measures.</p>
+                <ul>
+                    <li><a href="files/68240005 PVC Refurb Primer.pdf" target="_blank" class="doc-link">PVC Refurbishment Primer May 2025 (PDF - local file)</a></li>
+                </ul>
+            </section>
+
+            <section id="dop-portal" class="content-section mb-12">
+                <h2>Declaration of Performance (DoP) Portal</h2>
+                <p>Access Declarations of Performance for our construction products as required by relevant regulations.</p>
+                <ul>
+                    <li><a href="https://www.ikodop.eu/BrandSelection.aspx?r=GB" target="_blank" class="doc-link">External Link: IKO DoP Portal (GB)</a></li>
+                </ul>
+            </section>
+
+        </div>
+    </main>
+
+    <footer class="bg-gray-700 text-gray-300 text-center p-4 mt-auto">
+        <p>&copy; <span id="currentYear"></span> Cayler. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Mobile Menu Toggle Logic
+        const mobileMenuButton = document.getElementById('mobileMenuButton');
+        const mobileNav = document.getElementById('mobileNav');
+
+        if(mobileMenuButton && mobileNav) { 
+            mobileMenuButton.addEventListener('click', () => {
+                mobileNav.classList.toggle('hidden');
+            });
+        }
+        
+        // Smooth scroll for anchor links & close mobile menu
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+
+                if(targetElement) {
+                    // Optional: Calculate header height if you need more precise scrolling
+                    // const headerOffset = document.querySelector('header').offsetHeight;
+                    // const elementPosition = targetElement.getBoundingClientRect().top;
+                    // const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                    // window.scrollTo({ top: offsetPosition, behavior: "smooth" });
+
+                    targetElement.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start' // Aligns the top of the target element to the top of the viewport
+                    });
+                }
+
+                // Close mobile menu if open
+                if(mobileNav && !mobileNav.classList.contains('hidden')) {
+                    mobileNav.classList.add('hidden');
+                }
+            });
+        });
+
+
+        // Set current year in footer
+        document.addEventListener('DOMContentLoaded', () => { 
+            const currentYearSpan = document.getElementById('currentYear');
+            if(currentYearSpan) {
+                currentYearSpan.textContent = new Date().getFullYear(); 
+            }
+        });
+    </script>
+</body>
+</html>

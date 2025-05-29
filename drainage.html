@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drainage Calculator - Cayler</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* bg-gray-100 */
+        }
+        /* Styles for the top menu items (acting as tabs for this page) */
+        .drainage-tab-button { 
+            padding: 0.75rem 1.0rem; 
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+            color: #d1d5db; /* gray-400 for inactive links */
+            text-decoration: none; 
+            font-size: 0.875rem; /* text-sm for more items */
+        }
+        .drainage-tab-button:hover {
+            color: #ffffff; /* white */
+            border-bottom-color: #4b5563; /* gray-600 */
+        }
+        .drainage-tab-button.active-drainage-tab { 
+            color: #ffffff; /* white */
+            border-bottom-color: #4f46e5; /* indigo-600 */
+            font-weight: 600;
+        }
+         /* Style for the "Portal" button to make it distinct */
+        .portal-button-nav {
+            padding: 0.65rem 1.25rem; 
+            margin-right: 0.5rem; 
+            background-color: #374151; /* gray-700 */
+            color: white;
+            border: 1px solid #4b5563; /* gray-600 */
+            border-radius: 0.375rem; /* rounded-md */
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+            font-size: 0.875rem; /* text-sm */
+        }
+        .portal-button-nav:hover {
+            background-color: #4b5563; /* gray-600 */
+        }
+
+        /* Mobile menu link styling */
+        .mobile-drainage-nav-link { 
+            display: block;
+            padding: 0.75rem 1rem;
+            color: #d1d5db; /* gray-400 */
+            text-decoration: none;
+        }
+        .mobile-drainage-nav-link:hover, .mobile-drainage-nav-link.active-drainage-tab-mobile {
+            background-color: #4b5563; /* gray-600 */
+            color: #ffffff; /* white */
+        }
+        .mobile-portal-button {
+            display: block;
+            padding: 0.75rem 1rem;
+            margin: 0.5rem 1rem;
+            background-color: #4f46e5;
+            color: white;
+            border-radius: 0.375rem;
+            text-align: center;
+            text-decoration: none;
+        }
+         .mobile-portal-button:hover {
+            background-color: #4338ca;
+        }
+        
+        .drainage-content-section h2 { /* Main title for the tab */
+            font-size: 1.5rem; /* text-xl */
+            font-weight: 600; 
+            color: #1f2937; 
+            margin-bottom: 1.5rem; /* mb-6 */
+            padding-bottom: 0.75rem; /* pb-3 */
+            border-bottom: 1px solid #e5e7eb; /* border-gray-200 */
+        }
+        .data-section-container { /* Container for each distinct section */
+            background-color: #ffffff; /* white */
+            padding: 1.5rem; /* p-6 */
+            border-radius: 0.5rem; /* rounded-lg */
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); /* shadow-md */
+            margin-bottom: 2rem; /* mb-8 */
+        }
+        .data-section-container h3 { /* Sub-section headings */
+            font-size: 1.25rem; /* text-xl */
+            font-weight: 500; /* font-medium */
+            color: #374151; /* text-gray-700 */
+            margin-bottom: 1.5rem; /* mb-6 */
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .form-input {
+            margin-top: 0.25rem;
+            display: block;
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #d1d5db; /* border-gray-300 */
+            border-radius: 0.375rem; /* rounded-md */
+            box-shadow: sm;
+        }
+        .form-select {
+            margin-top: 0.25rem;
+            display: block;
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            background-color: #ffffff;
+            box-shadow: sm;
+        }
+        .form-field-group {
+            margin-bottom: 1rem; /* mb-4 */
+        }
+        .error-message {
+            color: #ef4444; /* red-500 */
+            font-size: 0.875rem; /* text-sm */
+            margin-top: 0.25rem;
+        }
+        .added-roof-card {
+            background-color: #f9fafb; /* gray-50 */
+            border: 1px solid #e5e7eb; /* border-gray-200 */
+            border-radius: 0.5rem; /* rounded-lg */
+            padding: 1rem; /* p-4 */
+            margin-bottom: 1rem; /* mb-4 */
+        }
+        .added-roof-card p {
+            margin-bottom: 0.25rem; /* mb-1 */
+            font-size: 0.875rem; /* text-sm */
+        }
+        .added-roof-card strong {
+            color: #4b5563; /* text-gray-600 */
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <header class="bg-gray-800 text-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center">
+                <a href="index.html" class="portal-button-nav">Portal</a> 
+                <h1 class="text-xl font-bold ml-4">Drainage Calculator</h1> 
+            </div>
+            <button id="mobileMenuButton" class="md:hidden p-2 rounded hover:bg-gray-700 focus:outline-none focus:bg-gray-700">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                </svg>
+            </button>
+            <nav id="desktopNav" class="hidden md:flex items-center space-x-1"> 
+                <button class="drainage-tab-button active-drainage-tab" data-tab="projectInputContent">Project</button>
+                <button class="drainage-tab-button" data-tab="outletGuideContent">Outlet Guide</button>
+                <button class="drainage-tab-button" data-tab="createRequestContent">Create Request</button>
+                <button class="drainage-tab-button" data-tab="drainageSettingsContent">Settings</button>
+            </nav>
+        </div>
+        <nav id="mobileNav" class="md:hidden hidden bg-gray-700 pb-2">
+            <a href="index.html" class="mobile-portal-button">Portal</a>
+            <button class="mobile-drainage-nav-link active-drainage-tab-mobile" data-tab="projectInputContent">Project</button>
+            <button class="mobile-drainage-nav-link" data-tab="outletGuideContent">Outlet Guide</button>
+            <button class="mobile-drainage-nav-link" data-tab="createRequestContent">Create Request</button>
+            <button class="mobile-drainage-nav-link" data-tab="drainageSettingsContent">Settings</button>
+        </nav>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8 flex-grow"> 
+        
+        <div id="projectInputContent" class="drainage-tab-content"> {/* Renamed ID for clarity */}
+            <h2 class="text-xl md:text-2xl font-semibold text-gray-800 mb-6 pb-3 border-b border-gray-200">Drainage Project Input</h2>
+            
+            <form id="drainageProjectForm">
+                <div class="data-section-container">
+                    <h3>Project Data</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                        <div class="form-field-group">
+                            <label for="sfReference" class="block text-sm font-medium text-gray-700">SF Reference</label>
+                            <input type="text" id="sfReference" name="sfReference" class="form-input" placeholder="e.g., 0123456" maxlength="7">
+                            <p id="sfReferenceError" class="error-message hidden">Must be 7 digits.</p>
+                        </div>
+                        <div class="form-field-group">
+                            <label for="projectName" class="block text-sm font-medium text-gray-700">Project Name</label>
+                            <input type="text" id="projectName" name="projectName" class="form-input" maxlength="50">
+                        </div>
+                        <div class="form-field-group">
+                            <label for="clientName" class="block text-sm font-medium text-gray-700">Client</label>
+                            <input type="text" id="clientName" name="clientName" class="form-input" maxlength="50">
+                        </div>
+                        <div class="form-field-group">
+                            <label for="projectPostcode" class="block text-sm font-medium text-gray-700">Postcode</label>
+                            <input type="text" id="projectPostcode" name="projectPostcode" class="form-input" maxlength="10">
+                             <p id="projectPostcodeError" class="error-message hidden">Max 10 chars, no special characters.</p>
+                        </div>
+                        <div class="form-field-group">
+                            <label for="safetyFactor" class="block text-sm font-medium text-gray-700">Safety Factor</label>
+                            <select id="safetyFactor" name="safetyFactor" class="form-select">
+                                <option value="">Select...</option>
+                                <option value="1.0">1.0 (Placeholder)</option>
+                                <option value="1.5">1.5 (Placeholder)</option>
+                            </select>
+                        </div>
+                        <div class="form-field-group">
+                            <label for="buildingLife" class="block text-sm font-medium text-gray-700">Building Life (years)</label>
+                            <input type="number" id="buildingLife" name="buildingLife" class="form-input" value="60" min="1">
+                        </div>
+                        <div class="form-field-group md:col-span-2">
+                            <label for="roofingSystem" class="block text-sm font-medium text-gray-700">Roofing System</label>
+                            <select id="roofingSystem" name="roofingSystem" class="form-select">
+                                <option value="Armourplan">Armourplan</option>
+                                <option value="Spectraplan">Spectraplan</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <div class="data-section-container">
+                <h3>Add New Roof</h3>
+                <form id="addRoofForm">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                        <div class="form-field-group">
+                            <label for="roofName" class="block text-sm font-medium text-gray-700">Roof Name/Reference</label>
+                            <input type="text" id="roofName" name="roofName" class="form-input" maxlength="50">
+                        </div>
+                        <div class="form-field-group">
+                            <label for="roofFalls" class="block text-sm font-medium text-gray-700">Falls</label>
+                            <select id="roofFalls" name="roofFalls" class="form-select">
+                                <option value="1:80" selected>1:80</option>
+                                {/* Add other options later if needed */}
+                            </select>
+                        </div>
+                        <div class="form-field-group">
+                            <label for="greenRoof" class="block text-sm font-medium text-gray-700">Green Roof</label>
+                            <select id="greenRoof" name="greenRoof" class="form-select">
+                                <option value="false" selected>No</option>
+                                <option value="true">Yes</option>
+                            </select>
+                        </div>
+                        <div class="form-field-group">
+                            <label for="catchmentArea" class="block text-sm font-medium text-gray-700">Catchment Area (m²)</label>
+                            <input type="number" id="catchmentArea" name="catchmentArea" class="form-input" step="0.01" min="0" placeholder="0.00">
+                        </div>
+                        <div class="form-field-group">
+                            <label for="adjacentArea" class="block text-sm font-medium text-gray-700">Adjacent Draining Areas/Walls (m²)</label>
+                            <input type="number" id="adjacentArea" name="adjacentArea" class="form-input" step="0.01" value="0.00" min="0">
+                        </div>
+                        <div class="form-field-group">
+                            <label for="outletType" class="block text-sm font-medium text-gray-700">Outlet Type</label>
+                            <select id="outletType" name="outletType" class="form-select">
+                                <option value="">Select...</option>
+                                <option value="typeA">Type A (Placeholder)</option>
+                                <option value="typeB">Type B (Placeholder)</option>
+                            </select>
+                        </div>
+                        <div class="form-field-group">
+                            <label for="proposedOutlets" class="block text-sm font-medium text-gray-700">Proposed Number of Outlets</label>
+                            <input type="number" id="proposedOutlets" name="proposedOutlets" class="form-input" step="1" min="0" placeholder="0">
+                        </div>
+                        <div class="md:col-span-2 mt-2">
+                             <button type="button" id="addRoofButton" class="w-full md:w-auto px-6 py-2.5 bg-green-600 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-green-700 hover:shadow-lg focus:bg-green-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-green-800 active:shadow-lg transition duration-150 ease-in-out">
+                                Add Roof to Project
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="data-section-container">
+                <h3>Added Roofs</h3>
+                <div id="addedRoofsContainer">
+                    <p class="text-gray-500 italic">No roofs added yet.</p>
+                    {/* Added roofs will be displayed here by JavaScript */}
+                </div>
+            </div>
+        </div>
+
+        <div id="outletGuideContent" class="drainage-tab-content hidden">
+            <div class="data-section-container">
+                <h2>Outlet Guide</h2>
+                <p>This section will provide guidance on selecting appropriate outlets, perhaps based on roof area, rainfall intensity, or other parameters. It might include tables, diagrams, or interactive selectors.</p>
+            </div>
+        </div>
+
+        <div id="createRequestContent" class="drainage-tab-content hidden">
+            <div class="data-section-container">
+                <h2>Create Request / Calculation</h2>
+                <p>This section will house the main input fields for the drainage calculation itself. Users will input specific data like roof areas, rainfall rates, outlet types selected, etc., and then trigger the calculation.</p>
+            </div>
+        </div>
+
+        <div id="drainageSettingsContent" class="drainage-tab-content hidden">
+            <div class="data-section-container">
+                <h2>Drainage Settings</h2>
+                <p>This section will allow users to configure default values or parameters used in the drainage calculations, such as default rainfall intensities for different regions, pipe coefficients, etc.</p>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="bg-gray-700 text-gray-300 text-center p-4 mt-auto">
+        <p>&copy; <span id="currentYear"></span> Cayler. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Tab Navigation Logic (same as before)
+        const mobileMenuButton = document.getElementById('mobileMenuButton');
+        const mobileNav = document.getElementById('mobileNav');
+        const drainageDesktopTabButtons = document.querySelectorAll('#desktopNav .drainage-tab-button');
+        const drainageMobileNavLinks = document.querySelectorAll('#mobileNav .mobile-drainage-nav-link');
+        const drainageTabContents = document.querySelectorAll('.drainage-tab-content');
+
+        if(mobileMenuButton && mobileNav) { 
+            mobileMenuButton.addEventListener('click', () => {
+                mobileNav.classList.toggle('hidden');
+            });
+        }
+        
+        function handleDrainageTabClick(event, linksToUpdate, activeClass) {
+            event.preventDefault();
+            const targetTabId = event.currentTarget.getAttribute('data-tab');
+            
+            drainageTabContents.forEach(content => {
+                content.classList.add('hidden');
+            });
+            const targetContentElement = document.getElementById(targetTabId);
+            if(targetContentElement) {
+                targetContentElement.classList.remove('hidden');
+            }
+
+            linksToUpdate.forEach(link => {
+                link.classList.remove(activeClass);
+            });
+            event.currentTarget.classList.add(activeClass);
+
+            if(mobileNav && !mobileNav.classList.contains('hidden') && event.currentTarget.classList.contains('mobile-drainage-nav-link')) {
+                mobileNav.classList.add('hidden');
+            }
+        }
+
+        drainageDesktopTabButtons.forEach(button => {
+            button.addEventListener('click', (e) => handleDrainageTabClick(e, drainageDesktopTabButtons, 'active-drainage-tab'));
+        });
+        drainageMobileNavLinks.forEach(link => {
+            link.addEventListener('click', (e) => handleDrainageTabClick(e, drainageMobileNavLinks, 'active-drainage-tab-mobile'));
+        });
+
+        // --- Drainage Project Form Logic ---
+        const projectDataForm = document.getElementById('drainageProjectForm'); // For project-level data
+        const addRoofForm = document.getElementById('addRoofForm'); // For new roof inputs
+        const addRoofButton = document.getElementById('addRoofButton');
+        const addedRoofsContainer = document.getElementById('addedRoofsContainer');
+
+        const sfReferenceInput = document.getElementById('sfReference');
+        const sfReferenceError = document.getElementById('sfReferenceError');
+        const projectPostcode = document.getElementById('projectPostcode');
+        const projectPostcodeError = document.getElementById('projectPostcodeError');
+
+        const DRAINAGE_APP_DATA_KEY = 'drainageAppData';
+
+        let drainageAppData = {
+            projectDetails: {},
+            roofs: []
+        };
+
+        // Function to save all drainage app data to session storage
+        function saveDrainageAppData() {
+            // Update projectDetails from the form
+            const projectFormData = new FormData(projectDataForm);
+            drainageAppData.projectDetails = {}; // Clear before repopulating
+            for (let [key, value] of projectFormData.entries()) {
+                drainageAppData.projectDetails[key] = value;
+            }
+            // The 'roofs' array is updated by the addRoof function
+            sessionStorage.setItem(DRAINAGE_APP_DATA_KEY, JSON.stringify(drainageAppData));
+            console.log("Drainage app data saved to session:", drainageAppData);
+        }
+
+        // Function to load all drainage app data from session storage
+        function loadDrainageAppData() {
+            const storedData = sessionStorage.getItem(DRAINAGE_APP_DATA_KEY);
+            if (storedData) {
+                drainageAppData = JSON.parse(storedData);
+                console.log("Loading drainage app data from session:", drainageAppData);
+
+                // Populate project details form
+                if (drainageAppData.projectDetails) {
+                    for (const key in drainageAppData.projectDetails) {
+                        if (projectDataForm.elements[key]) {
+                            projectDataForm.elements[key].value = drainageAppData.projectDetails[key];
+                        }
+                    }
+                }
+                // Re-validate loaded project data
+                validateSfReference();
+                validateProjectPostcode();
+
+                // Render added roofs
+                renderAddedRoofs();
+            } else {
+                // Set defaults for project details if no session data
+                document.getElementById('buildingLife').value = '60';
+                // Set defaults for the 'Add New Roof' form (done in resetRoofFormFields)
+                resetRoofFormFields();
+                renderAddedRoofs(); // To show "No roofs added yet"
+            }
+        }
+        
+        // Input Validation (Project Data)
+        function validateSfReference() {
+            const value = sfReferenceInput.value;
+            if (value && (!/^\d{7}$/.test(value))) {
+                sfReferenceError.classList.remove('hidden');
+                sfReferenceInput.classList.add('border-red-500');
+                return false;
+            } else {
+                sfReferenceError.classList.add('hidden');
+                sfReferenceInput.classList.remove('border-red-500');
+                return true;
+            }
+        }
+
+        function validateProjectPostcode() {
+            const value = projectPostcode.value;
+            if (value && !/^[a-zA-Z0-9\s]{1,10}$/.test(value)) {
+                projectPostcodeError.textContent = 'Max 10 chars, letters, numbers, and spaces only.';
+                projectPostcodeError.classList.remove('hidden');
+                projectPostcode.classList.add('border-red-500');
+                return false;
+            } else {
+                projectPostcodeError.classList.add('hidden');
+                projectPostcode.classList.remove('border-red-500');
+                return true;
+            }
+        }
+
+        // Function to render added roofs
+        function renderAddedRoofs() {
+            addedRoofsContainer.innerHTML = ''; // Clear previous entries
+            if (drainageAppData.roofs.length === 0) {
+                addedRoofsContainer.innerHTML = '<p class="text-gray-500 italic">No roofs added yet.</p>';
+                return;
+            }
+
+            drainageAppData.roofs.forEach((roof, index) => {
+                const roofCard = document.createElement('div');
+                roofCard.className = 'added-roof-card';
+                roofCard.innerHTML = `
+                    <h4 class="font-semibold text-md text-indigo-700 mb-2">Roof ${index + 1}: ${roof.roofName || 'Unnamed Roof'}</h4>
+                    <p><strong>Falls:</strong> ${roof.roofFalls || '-'}</p>
+                    <p><strong>Green Roof:</strong> ${roof.greenRoof === 'true' ? 'Yes' : 'No'}</p>
+                    <p><strong>Catchment Area:</strong> ${roof.catchmentArea || '-'} m²</p>
+                    <p><strong>Adjacent Area:</strong> ${roof.adjacentArea || '0.00'} m²</p>
+                    <p><strong>Outlet Type:</strong> ${roof.outletType || '-'}</p>
+                    <p><strong>Proposed Outlets:</strong> ${roof.proposedOutlets || '-'}</p>
+                    `;
+                addedRoofsContainer.appendChild(roofCard);
+            });
+        }
+
+        // Function to reset the "Add New Roof" form fields to defaults
+        function resetRoofFormFields() {
+            addRoofForm.reset(); // Resets to HTML defaults
+            // Set specific defaults if different from HTML blank state
+            document.getElementById('roofFalls').value = '1:80';
+            document.getElementById('greenRoof').value = 'false';
+            document.getElementById('adjacentArea').value = '0.00';
+        }
+
+        // Event listener for "Add Roof to Project" button
+        if (addRoofButton) {
+            addRoofButton.addEventListener('click', () => {
+                const roofFormData = new FormData(addRoofForm);
+                const newRoof = {};
+                let isValidRoof = true; // Basic validation flag for roof form
+
+                // Example: Validate roof name (optional, but good practice)
+                const roofNameValue = roofFormData.get('roofName');
+                if (!roofNameValue || roofNameValue.trim() === "") {
+                    // alert("Roof Name is required."); // Replace alert with better UI later
+                    // isValidRoof = false; 
+                    // For now, we'll allow unnamed roofs or handle it more gracefully
+                }
+
+                if (isValidRoof) {
+                    for (let [key, value] of roofFormData.entries()) {
+                        newRoof[key] = value;
+                    }
+                    drainageAppData.roofs.push(newRoof);
+                    saveDrainageAppData(); // Save everything (project details + updated roofs array)
+                    renderAddedRoofs();
+                    resetRoofFormFields();
+                }
+            });
+        }
+
+        // Event listeners for project data form
+        if (projectDataForm) {
+            sfReferenceInput.addEventListener('input', () => {
+                validateSfReference();
+                saveDrainageAppData(); // Save on valid input or any input
+            });
+            projectPostcode.addEventListener('input', () => {
+                validateProjectPostcode();
+                saveDrainageAppData();
+            });
+
+            Array.from(projectDataForm.elements).forEach(element => {
+                if (element.id !== 'sfReference' && element.id !== 'projectPostcode') { // Already handled
+                    element.addEventListener('change', saveDrainageAppData); 
+                    if (element.type !== 'select-one') {
+                        element.addEventListener('input', saveDrainageAppData); 
+                    }
+                }
+            });
+        }
+
+
+        // Initial DOMContentLoaded setup
+        document.addEventListener('DOMContentLoaded', () => { 
+            const currentYearSpan = document.getElementById('currentYear');
+            if(currentYearSpan) {
+                currentYearSpan.textContent = new Date().getFullYear(); 
+            }
+
+            loadDrainageAppData(); // Load all saved data or set defaults
+
+            // Set the first tab ("Project") as active by default
+            if(drainageDesktopTabButtons.length > 0) {
+                drainageDesktopTabButtons[0].classList.add('active-drainage-tab');
+            }
+            if(drainageMobileNavLinks.length > 0) {
+                drainageMobileNavLinks[0].classList.add('active-drainage-tab-mobile');
+            }
+            if(drainageTabContents.length > 0) {
+                drainageTabContents.forEach((content, index) => {
+                    if (index === 0) { // Show the first tab content
+                        content.classList.remove('hidden');
+                    } else {
+                        content.classList.add('hidden');
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
