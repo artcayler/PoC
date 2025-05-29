@@ -71,16 +71,16 @@
                 grid-template-columns: repeat(2, minmax(0, 1fr));
             }
         }
-        .calculated-field {
+        .calculated-field, .deck-info-display {
             margin-top: 0.5rem;
             padding: 0.5rem;
             background-color: #eef2ff; /* indigo-50 */
             border-left: 3px solid #6366f1; /* indigo-500 */
             font-size: 0.875rem; /* text-sm */
-        }
-        .calculated-field .value {
-            font-weight: 600;
             color: #4338ca; /* indigo-700 */
+        }
+        .calculated-field .value, .deck-info-display .value {
+            font-weight: 600;
         }
         .calculated-field .info {
             margin-top: 0.25rem;
@@ -137,10 +137,15 @@
             background-color: #fee2e2; /* red-100 */
             color: #991b1b; /* red-800 */
         }
-        #settingsStatus {
-            margin-top: 1rem;
-            font-style: italic;
-            color: #4b5563; /* gray-600 */
+        select:disabled {
+            background-color: #e5e7eb; /* bg-gray-200 */
+            color: #6b7280; /* text-gray-500 */
+            cursor: not-allowed;
+        }
+        input[type="number"]:disabled {
+             background-color: #f3f4f6; /* bg-gray-100 */
+             color: #9ca3af; /* text-gray-400 */
+             cursor: not-allowed;
         }
     </style>
 </head>
@@ -228,40 +233,54 @@
                         </div>
                     </section>
                     <section class="input-section mb-8">
+                        <h3>Structural Deck</h3>
+                        <div class="form-field-grid md:grid-cols-1"> 
+                             <div>
+                                <label for="structuralDeckType" class="block text-sm font-medium text-gray-700 mb-1">Structural Deck Type</label>
+                                <select id="structuralDeckType" name="structuralDeckType"
+                                        class="mt-1 block w-full px-4 py-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                    {/* Options will be populated by JavaScript */}
+                                </select>
+                            </div>
+                            <div id="selectedDeckInfo" class="mt-2 space-y-1" style="display: none;">
+                                <div class="deck-info-display">Selected Pitch: <span id="selectedDeckPitch" class="value">-</span> mm</div>
+                                <div class="deck-info-display">Selected Bonding Area: <span id="selectedDeckBonding" class="value">-</span> %</div>
+                            </div>
+                             <div id="manualDeckInputFields" class="mt-4 space-y-4" style="display: none;">
+                                <div>
+                                    <label for="manualPitch" class="block text-sm font-medium text-gray-700 mb-1">Manual Pitch (mm)</label>
+                                    <input type="number" id="manualPitch" name="manualPitch" step="1" min="0"
+                                           class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                           placeholder="e.g., 150">
+                                </div>
+                                <div>
+                                    <label for="manualBondingArea" class="block text-sm font-medium text-gray-700 mb-1">Manual Bonding Area (%)</label>
+                                    <input type="number" id="manualBondingArea" name="manualBondingArea" step="1" min="0" max="100"
+                                           class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                           placeholder="e.g., 50">
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    <section class="input-section mb-8">
                         <h3>Substrate Information</h3>
                         <div class="form-field-grid">
                             <div>
                                 <label for="airPermeability" class="block text-sm font-medium text-gray-700 mb-1">Air Permeability Confirmed?</label>
                                 <select id="airPermeability" name="airPermeability"
                                         class="mt-1 block w-full px-4 py-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                                    <option value="">Select...</option>
+                                    <option value="">Select...</option> 
                                     <option value="true">Yes</option>
-                                    <option value="false">No</option>
+                                    <option value="false">No (Air Tight)</option>
                                 </select>
                             </div>
                             <div>
                                 <label for="dominantOpening" class="block text-sm font-medium text-gray-700 mb-1">Dominant Opening Present?</label>
                                 <select id="dominantOpening" name="dominantOpening"
                                         class="mt-1 block w-full px-4 py-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                                    <option value="">Select...</option>
+                                    <option value="">Select...</option> 
                                     <option value="true">Yes</option>
                                     <option value="false">No</option>
-                                </select>
-                            </div>
-                        </div>
-                    </section>
-                    <section class="input-section mb-8">
-                        <h3>Structural Deck</h3>
-                        <div class="form-field-grid">
-                             <div>
-                                <label for="structuralDeckType" class="block text-sm font-medium text-gray-700 mb-1">Structural Deck Type</label>
-                                <select id="structuralDeckType" name="structuralDeckType"
-                                        class="mt-1 block w-full px-4 py-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                                    <option value="">Select type...</option>
-                                    <option value="concrete">Concrete</option>
-                                    <option value="metal">Metal</option>
-                                    <option value="timber">Timber</option>
-                                    <option value="other">Other (Specify)</option>
                                 </select>
                             </div>
                         </div>
@@ -326,7 +345,8 @@
                                     <td class="row-title">Factor of Safety (FoS)</td>
                                     <td colspan="4" class="full-width-select">
                                         <select id="factorOfSafetySelect" class="px-2 py-1 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm w-auto">
-                                            {/* Options will be populated from settings */}
+                                            <option value="1.35" selected>1.35</option>
+                                            <option value="1.5">1.5</option>
                                         </select>
                                     </td>
                                 </tr>
@@ -402,12 +422,12 @@
         </div>
 
         <div id="settingsContent" class="tab-content hidden">
-            <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-4xl mx-auto">
+            <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-5xl mx-auto"> 
                 <h2 class="text-2xl font-semibold text-gray-700 mb-6">Application Settings</h2>
-                <div id="settingsStatus" class="mb-4 text-sm"></div>
                 
                 <section class="mb-8">
                     <h3>External Pressure Coefficients (Cpe) - Flat Roof with Parapets</h3>
+                    <p class="text-sm text-gray-600 mb-2">These values are used to determine Cpe based on parapet height ratio. Calculations on the 'Flat Roof' tab will dynamically use the appropriate set.</p>
                     <div class="overflow-x-auto">
                         <table class="results-table min-w-full" id="settingsCpeParapetsTable">
                             <thead>
@@ -420,16 +440,98 @@
                                 </tr>
                             </thead>
                             <tbody>
+                                <tr>
+                                    <td class="row-title">No Parapet (ratio &lt; 0.05)</td>
+                                    <td><input type="number" class="setting-input" data-cpe-id="no_parapet_F" value="-2.00" step="0.01"></td>
+                                    <td><input type="number" class="setting-input" data-cpe-id="no_parapet_G" value="-1.40" step="0.01"></td>
+                                    <td><input type="number" class="setting-input" data-cpe-id="no_parapet_H" value="-0.70" step="0.01"></td>
+                                    <td><input type="number" class="setting-input" data-cpe-id="no_parapet_I" value="-0.20" step="0.01"></td>
+                                </tr>
+                                <tr>
+                                    <td class="row-title">Parapet ~0.05 (0.05 &le; ratio &lt; 0.10)</td>
+                                    <td><input type="number" class="setting-input" data-cpe-id="parapet_005_F" value="-1.90" step="0.01"></td>
+                                    <td><input type="number" class="setting-input" data-cpe-id="parapet_005_G" value="-1.30" step="0.01"></td>
+                                    <td><input type="number" class="setting-input" data-cpe-id="parapet_005_H" value="-0.70" step="0.01"></td>
+                                    <td><input type="number" class="setting-input" data-cpe-id="parapet_005_I" value="-0.20" step="0.01"></td>
+                                </tr>
+                                <tr>
+                                    <td class="row-title">Parapet ~0.10 (0.10 &le; ratio &lt; 0.20)</td>
+                                    <td><input type="number" class="setting-input" data-cpe-id="parapet_010_F" value="-1.85" step="0.01"></td>
+                                    <td><input type="number" class="setting-input" data-cpe-id="parapet_010_G" value="-1.30" step="0.01"></td>
+                                    <td><input type="number" class="setting-input" data-cpe-id="parapet_010_H" value="-0.70" step="0.01"></td>
+                                    <td><input type="number" class="setting-input" data-cpe-id="parapet_010_I" value="-0.20" step="0.01"></td>
+                                </tr>
+                                <tr>
+                                    <td class="row-title">Parapet ~0.20 (ratio &ge; 0.20)</td>
+                                    <td><input type="number" class="setting-input" data-cpe-id="parapet_020_F" value="-1.40" step="0.01"></td>
+                                    <td><input type="number" class="setting-input" data-cpe-id="parapet_020_G" value="-1.00" step="0.01"></td>
+                                    <td><input type="number" class="setting-input" data-cpe-id="parapet_020_H" value="-0.70" step="0.01"></td>
+                                    <td><input type="number" class="setting-input" data-cpe-id="parapet_020_I" value="-0.20" step="0.01"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section class="mb-8">
+                    <h3>Internal Pressure Coefficients (Cpi)</h3>
+                    <p class="text-sm text-gray-600 mb-2">These values are selected based on Substrate Information choices on the Data Input tab.</p>
+                    <div class="overflow-x-auto">
+                        <table class="results-table min-w-full" id="settingsCpiTable">
+                            <thead>
+                                <tr>
+                                    <th>Internal Pressure Condition</th>
+                                    <th>Zone F (Cpi)</th>
+                                    <th>Zone G (Cpi)</th>
+                                    <th>Zone H (Cpi)</th>
+                                    <th>Zone I (Cpi)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="row-title">Default</td>
+                                    <td><input type="number" class="setting-input" data-cpi-id="default_cpi_F" value="0.20" step="0.01"></td>
+                                    <td><input type="number" class="setting-input" data-cpi-id="default_cpi_G" value="0.20" step="0.01"></td>
+                                    <td><input type="number" class="setting-input" data-cpi-id="default_cpi_H" value="0.20" step="0.01"></td>
+                                    <td><input type="number" class="setting-input" data-cpi-id="default_cpi_I" value="0.20" step="0.01"></td>
+                                </tr>
+                                <tr>
+                                    <td class="row-title">Air Tight Deck (Permeability: No)</td>
+                                    <td><input type="number" class="setting-input" data-cpi-id="air_tight_cpi_F" value="0.00" step="0.01"></td>
+                                    <td><input type="number" class="setting-input" data-cpi-id="air_tight_cpi_G" value="0.00" step="0.01"></td>
+                                    <td><input type="number" class="setting-input" data-cpi-id="air_tight_cpi_H" value="0.00" step="0.01"></td>
+                                    <td><input type="number" class="setting-input" data-cpi-id="air_tight_cpi_I" value="0.00" step="0.01"></td>
+                                </tr>
+                                <tr>
+                                    <td class="row-title">Dominant Opening (Opening: Yes)</td>
+                                    <td><input type="number" class="setting-input" data-cpi-id="dominant_opening_cpi_F" value="0.70" step="0.01"></td>
+                                    <td><input type="number" class="setting-input" data-cpi-id="dominant_opening_cpi_G" value="0.70" step="0.01"></td>
+                                    <td><input type="number" class="setting-input" data-cpi-id="dominant_opening_cpi_H" value="0.70" step="0.01"></td>
+                                    <td><input type="number" class="setting-input" data-cpi-id="dominant_opening_cpi_I" value="0.70" step="0.01"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                 <section class="mb-8">
+                    <h3>Structural Deck Properties</h3>
+                     <p class="text-sm text-gray-600 mb-2">Default values for predefined deck types. 'Manual Input' option on Data Input tab allows overriding these.</p>
+                    <div class="overflow-x-auto">
+                        <table class="results-table min-w-full" id="settingsDeckTable">
+                            <thead>
+                                <tr>
+                                    <th>Deck Type</th>
+                                    <th>Pitch (mm)</th>
+                                    <th>Bonding Area (%)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
                                 {/* Rows will be populated by JavaScript */}
                             </tbody>
                         </table>
                     </div>
                 </section>
-                {/* Add more settings sections/tables here as needed */}
-                <div class="mt-8 text-right">
-                    <button id="saveSettingsButton" class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 mr-2">Save Settings for Session</button>
-                    <button id="resetSettingsButton" class="px-6 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50">Reset to Defaults</button>
-                </div>
             </div>
         </div>
     </main>
@@ -439,11 +541,6 @@
     </footer>
 
     <script>
-        // --- Global Variables for Settings ---
-        let defaultAppSettings = {}; // To store data from settings.json
-        let currentAppSettings = {}; // To store currently active settings (from JSON or session)
-        const SESSION_STORAGE_KEY = 'buildingAnalysisAppSettings';
-
         // Helper function to format numbers
         const formatNumber = (valueStr, decimalPlaces, defaultValue = "-") => {
             const parsed = parseFloat(valueStr);
@@ -484,210 +581,231 @@
             });
         });
         
-        // Store for flat roof calculation parameters (will be updated from settings)
-        let flatRoofParams = {
-            coefficients: { F: -2.0, G: -1.4, H: -0.7, I: -0.2 }, // Initial defaults, will be overwritten
-            internalPressureCoefficient: 0.2, 
+        // Hardcoded application settings
+        const appSettings = {
+            cpeByParapetRatio: {
+                no_parapet: { F: -2.0, G: -1.4, H: -0.7, I: -0.2 },
+                parapet_005: { F: -1.90, G: -1.30, H: -0.70, I: -0.20 }, 
+                parapet_010: { F: -1.85, G: -1.30, H: -0.70, I: -0.20 }, 
+                parapet_020: { F: -1.40, G: -1.00, H: -0.70, I: -0.20 }  
+            },
+            internalPressureCoefficients: {
+                default_cpi:    { zones: { F: 0.2, G: 0.2, H: 0.2, I: 0.2 }, description: "Default Cpi" },
+                air_tight_cpi:  { zones: { F: 0.0, G: 0.0, H: 0.0, I: 0.0 }, description: "Air Tight Deck Cpi" },
+                dominant_opening_cpi: { zones: { F: 0.7, G: 0.7, H: 0.7, I: 0.7 }, description: "Dominant Opening Cpi" }
+            },
+            structuralDeckData: [
+                { id: "timber", name: "Timber", pitch: 120, bondingArea: 100, isManual: false },
+                { id: "concrete", name: "Concrete", pitch: 120, bondingArea: 100, isManual: false },
+                { id: "d32s", name: "D32S", pitch: 200, bondingArea: 51, isManual: false },
+                { id: "d35", name: "D35", pitch: 150, bondingArea: 50, isManual: false },
+                { id: "d46", name: "D46", pitch: 225, bondingArea: 37, isManual: false },
+                { id: "d60", name: "D60", pitch: 200, bondingArea: 36, isManual: false },
+                { id: "d100", name: "D100", pitch: 233.3, bondingArea: 33, isManual: false },
+                { id: "d137_135", name: "D137/135", pitch: 310, bondingArea: 35, isManual: false },
+                { id: "d159", name: "D159", pitch: 250, bondingArea: 33, isManual: false },
+                { id: "d153", name: "D153", pitch: 280, bondingArea: 35, isManual: false },
+                { id: "d200", name: "D200", pitch: 375, bondingArea: 39, isManual: false },
+                { id: "firth_sr30_plus", name: "Firth SR30+", pitch: 200, bondingArea: 60, isManual: false },
+                { id: "firth_sr35_plus", name: "Firth SR35+", pitch: 150, bondingArea: 46, isManual: false },
+                { id: "firth_sr60_plus", name: "Firth SR60+", pitch: 213, bondingArea: 46, isManual: false },
+                { id: "firth_sr100_plus", name: "Firth SR100+", pitch: 240, bondingArea: 42, isManual: false },
+                { id: "ji_265_1060", name: "JI 265-1060", pitch: 265, bondingArea: 73, isManual: false },
+                { id: "ji_252_1010", name: "JI 252-1010", pitch: 252.5, bondingArea: 71, isManual: false },
+                { id: "ji_225_900", name: "JI 225-900", pitch: 225, bondingArea: 68, isManual: false },  
+                { id: "ji_195_780", name: "JI 73-195-780", pitch: 195, bondingArea: 64, isManual: false },
+                { id: "ji_280_1120", name: "JI 280-1120", pitch: 280, bondingArea: 42, isManual: false },
+                { id: "ji_275_825", name: "JI 100-275-825", pitch: 275, bondingArea: 50, isManual: false },
+                { id: "ji_250_750", name: "JI 250-750", pitch: 250, bondingArea: 56, isManual: false },  
+                { id: "ji_320_960", name: "JI 320-960", pitch: 320, bondingArea: 54, isManual: false },  
+                { id: "ji_310_930", name: "JI 310-930", pitch: 310, bondingArea: 46, isManual: false },  
+                { id: "ji_280_840", name: "JI 280-840", pitch: 280, bondingArea: 42, isManual: false },  
+                { id: "ji_250_750_alt", name: "JI 250-750 (alt)", pitch: 250, bondingArea: 47, isManual: false }, 
+                { id: "ji_375_750", name: "JI 200-375-750", pitch: 375, bondingArea: 54, isManual: false },
+                { id: "manual_input", name: "Manual Input", pitch: null, bondingArea: null, isManual: true } 
+            ],
             zones: ['F', 'G', 'H', 'I']
         };
+        
+        let activeCpeCoefficients = { ...appSettings.cpeByParapetRatio.no_parapet }; 
+        let activeCpiCoefficients = { ...appSettings.internalPressureCoefficients.default_cpi.zones };
 
         const factorOfSafetySelect = document.getElementById('factorOfSafetySelect');
-        const settingsStatusDiv = document.getElementById('settingsStatus');
+        const airPermeabilitySelect = document.getElementById('airPermeability');
+        const dominantOpeningSelect = document.getElementById('dominantOpening');
+        const structuralDeckTypeSelect = document.getElementById('structuralDeckType');
+        const selectedDeckPitchSpan = document.getElementById('selectedDeckPitch');
+        const selectedDeckBondingSpan = document.getElementById('selectedDeckBonding');
+        const selectedDeckInfoDiv = document.getElementById('selectedDeckInfo');
+        const manualDeckInputFieldsDiv = document.getElementById('manualDeckInputFields');
+        const manualPitchInput = document.getElementById('manualPitch');
+        const manualBondingAreaInput = document.getElementById('manualBondingArea');
 
-        // --- Settings Management Functions ---
-        async function loadDefaultSettingsFromFile() {
-            try {
-                const response = await fetch('settings.json');
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status} while fetching settings.json`);
-                }
-                defaultAppSettings = await response.json();
-                console.log("Default settings loaded from settings.json:", defaultAppSettings);
-            } catch (error) {
-                console.error("Error loading default settings from settings.json:", error);
-                settingsStatusDiv.textContent = "Error: Could not load default settings. Using fallback.";
-                // Fallback default settings if JSON fails to load
-                defaultAppSettings = {
-                    flatRoofCpeParapets: [
-                        { id: "no_parapet", typeDescription: "No Parapet", zones: { F: -2.00, G: -1.40, H: -0.70, I: -0.20 }},
-                        { id: "parapet_005", typeDescription: "Parapet ~0.05", zones: { F: null, G: null, H: null, I: null }},
-                        { id: "parapet_010", typeDescription: "Parapet ~0.10", zones: { F: null, G: null, H: null, I: null }},
-                        { id: "parapet_020", typeDescription: "Parapet ~0.20", zones: { F: null, G: null, H: null, I: null }}
-                    ],
-                    internalPressureCoefficient: { default_cpi: 0.2 },
-                    factorOfSafetyOptions: [1.35, 1.5],
-                    defaultFactorOfSafety: 1.35
-                };
-            }
-        }
 
-        function loadSettingsFromSession() {
-            const storedSettings = sessionStorage.getItem(SESSION_STORAGE_KEY);
-            if (storedSettings) {
-                try {
-                    currentAppSettings = JSON.parse(storedSettings);
-                    console.log("Settings loaded from session storage:", currentAppSettings);
-                    settingsStatusDiv.textContent = "Settings loaded from current session.";
-                    return true;
-                } catch (error) {
-                    console.error("Error parsing settings from session storage:", error);
-                    sessionStorage.removeItem(SESSION_STORAGE_KEY); // Clear corrupted data
-                }
-            }
-            settingsStatusDiv.textContent = "Using default settings.";
-            return false;
-        }
-
-        function populateCpeSettingsTable(settings) {
-            const tableBody = document.getElementById('settingsCpeParapetsTable').querySelector('tbody');
-            tableBody.innerHTML = ''; // Clear existing rows
-
-            if (settings.flatRoofCpeParapets && Array.isArray(settings.flatRoofCpeParapets)) {
-                settings.flatRoofCpeParapets.forEach(parapetType => {
-                    const row = tableBody.insertRow();
-                    const typeCell = row.insertCell();
-                    typeCell.textContent = parapetType.typeDescription;
-                    typeCell.className = 'row-title';
-
-                    flatRoofParams.zones.forEach(zone => {
-                        const cell = row.insertCell();
-                        const input = document.createElement('input');
-                        input.type = 'number';
-                        input.className = 'setting-input';
-                        input.id = `setting_cpe_${parapetType.id}_${zone}`;
-                        input.step = "0.01";
-                        const value = parapetType.zones[zone];
-                        input.value = (value !== null && typeof value !== 'undefined') ? parseFloat(value).toFixed(2) : '';
-                        input.placeholder = "0.00";
-                        cell.appendChild(input);
-                    });
+        // --- Populate Settings Tables and Dropdowns ---
+        function populateSettingsTables() {
+            const deckTableBody = document.getElementById('settingsDeckTable')?.querySelector('tbody');
+            if (deckTableBody) {
+                deckTableBody.innerHTML = ''; 
+                appSettings.structuralDeckData.forEach(deck => {
+                    if (deck.isManual) return; 
+                    const row = deckTableBody.insertRow();
+                    row.insertCell().textContent = deck.name;
+                    const pitchCell = row.insertCell();
+                    const bondingCell = row.insertCell();
+                    pitchCell.textContent = deck.pitch !== null ? Math.round(deck.pitch) : '-'; 
+                    bondingCell.textContent = deck.bondingArea !== null ? Math.round(deck.bondingArea) : '-'; 
+                    pitchCell.classList.add('text-right'); 
+                    bondingCell.classList.add('text-right');
                 });
             }
         }
         
-        function populateFactorOfSafetyDropdown(settings) {
-            factorOfSafetySelect.innerHTML = ''; // Clear existing options
-            if (settings.factorOfSafetyOptions && Array.isArray(settings.factorOfSafetyOptions)) {
-                settings.factorOfSafetyOptions.forEach(fos => {
-                    const option = document.createElement('option');
-                    option.value = fos;
-                    option.textContent = fos.toFixed(2);
-                    if (fos === settings.defaultFactorOfSafety) {
-                        option.selected = true;
-                    }
-                    factorOfSafetySelect.appendChild(option);
-                });
-            }
-        }
-
-
-        function applySettingsToApp(settings) {
-            // 1. Populate UI elements in the Settings tab
-            populateCpeSettingsTable(settings);
-            populateFactorOfSafetyDropdown(settings);
-
-            // 2. Update flatRoofParams for calculations
-            // For now, always use "no_parapet" Cpe values for calculations.
-            // A more advanced implementation would select based on parapetRatio.
-            const noParapetSettings = settings.flatRoofCpeParapets.find(p => p.id === "no_parapet");
-            if (noParapetSettings) {
-                flatRoofParams.coefficients = { ...noParapetSettings.zones }; // Update Cpe values
-            }
-            flatRoofParams.internalPressureCoefficient = settings.internalPressureCoefficient?.default_cpi || 0.2;
-            
-            // Set default FoS in dropdown if it exists in options
-            if (settings.defaultFactorOfSafety && settings.factorOfSafetyOptions.includes(settings.defaultFactorOfSafety)) {
-                 factorOfSafetySelect.value = settings.defaultFactorOfSafety;
-            }
-
-
-            // 3. Recalculate tables that depend on these settings
-            calculateAndUpdateFlatRoofTable();
-        }
-
-        async function initializeSettings() {
-            await loadDefaultSettingsFromFile(); // Load from settings.json first
-            if (!loadSettingsFromSession()) { // If no session settings, use defaults
-                currentAppSettings = JSON.parse(JSON.stringify(defaultAppSettings)); // Deep copy
-            }
-            applySettingsToApp(currentAppSettings);
-        }
-
-        function saveSettingsToSession() {
-            // Read Cpe values from the settings table
-            const newCpeSettings = defaultAppSettings.flatRoofCpeParapets.map(parapetType => {
-                const updatedZones = {};
-                flatRoofParams.zones.forEach(zone => {
-                    const inputElement = document.getElementById(`setting_cpe_${parapetType.id}_${zone}`);
-                    const value = parseFloat(inputElement.value);
-                    updatedZones[zone] = isNaN(value) ? null : value;
-                });
-                return { ...parapetType, zones: updatedZones };
+        function populateStructuralDeckDropdown() {
+            structuralDeckTypeSelect.innerHTML = '<option value="">Select type...</option>'; 
+            appSettings.structuralDeckData.forEach(deck => {
+                const option = document.createElement('option');
+                option.value = deck.id;
+                option.textContent = deck.name;
+                structuralDeckTypeSelect.appendChild(option);
             });
+        }
 
-            // Update currentAppSettings with values from the form
-            currentAppSettings.flatRoofCpeParapets = newCpeSettings;
-            currentAppSettings.defaultFactorOfSafety = parseFloat(factorOfSafetySelect.value);
-            // Add other settings as they are implemented (e.g., internalPressureCoefficient if made editable)
 
-            try {
-                sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(currentAppSettings));
-                console.log("Settings saved to session storage:", currentAppSettings);
-                settingsStatusDiv.textContent = "Settings saved for current session.";
-                applySettingsToApp(currentAppSettings); // Re-apply to update calculations
-            } catch (error) {
-                console.error("Error saving settings to session storage:", error);
-                settingsStatusDiv.textContent = "Error: Could not save settings.";
+        // --- Event Handlers for Input Changes ---
+        structuralDeckTypeSelect.addEventListener('change', function() {
+            const selectedDeckId = this.value;
+            const selectedDeck = appSettings.structuralDeckData.find(d => d.id === selectedDeckId);
+            let airPermeabilityChangedByDeck = false;
+
+            if (selectedDeck) {
+                if (selectedDeck.isManual) {
+                    selectedDeckInfoDiv.style.display = 'none';
+                    manualDeckInputFieldsDiv.style.display = 'block';
+                    manualPitchInput.value = '';
+                    manualBondingAreaInput.value = '';
+                    manualPitchInput.disabled = false;
+                    manualBondingAreaInput.disabled = false;
+                } else {
+                    selectedDeckInfoDiv.style.display = 'block';
+                    selectedDeckPitchSpan.textContent = selectedDeck.pitch !== null ? Math.round(selectedDeck.pitch) : '-';
+                    selectedDeckBondingSpan.textContent = selectedDeck.bondingArea !== null ? Math.round(selectedDeck.bondingArea) : '-';
+                    manualDeckInputFieldsDiv.style.display = 'none';
+                    manualPitchInput.disabled = true;
+                    manualBondingAreaInput.disabled = true;
+                }
+
+                if (selectedDeck.id === 'concrete') {
+                    if (airPermeabilitySelect.value !== "false") {
+                        airPermeabilitySelect.value = "false"; 
+                        airPermeabilityChangedByDeck = true;
+                    }
+                } else { // Deck is NOT concrete
+                    // If air permeability was previously set to "false" (likely by "concrete" selection),
+                    // and now a non-concrete deck is chosen, revert air permeability to "Select..."
+                    if (airPermeabilitySelect.value === "false") {
+                         airPermeabilitySelect.value = ""; // Revert to "Select..."
+                         airPermeabilityChangedByDeck = true;
+                    }
+                }
+            } else { // No deck selected or invalid selection
+                selectedDeckInfoDiv.style.display = 'none';
+                manualDeckInputFieldsDiv.style.display = 'none';
+                manualPitchInput.disabled = true;
+                manualBondingAreaInput.disabled = true;
+                 // If no deck is selected, and air permeability was 'false', revert it.
+                if (airPermeabilitySelect.value === "false") {
+                    airPermeabilitySelect.value = "";
+                    airPermeabilityChangedByDeck = true;
+                }
+            }
+            // If air permeability was changed by deck selection, trigger its change event
+            if (airPermeabilityChangedByDeck) {
+                airPermeabilitySelect.dispatchEvent(new Event('change'));
+            } else {
+                // If air permeability wasn't changed by deck, still need to ensure Cpi updates
+                // if dominant opening state might have changed (e.g. re-enabled)
+                updateCpiSettingsAndRecalculate();
+            }
+        });
+
+        function updateCpiSettingsAndRecalculate() {
+            const airPerm = airPermeabilitySelect.value; 
+            const domOpening = dominantOpeningSelect.value; 
+            let cpiSourceKey = 'default_cpi'; 
+            let deckTypeChangedToConcrete = false;
+
+            if (airPerm === "false") { 
+                cpiSourceKey = 'air_tight_cpi';
+                if (dominantOpeningSelect.value !== "") { // Only reset if it wasn't already "Select..."
+                    dominantOpeningSelect.value = ""; 
+                }
+                dominantOpeningSelect.disabled = true;
+                // If air permeability is set to "No", default deck to "Concrete" if not already
+                if (structuralDeckTypeSelect.value !== "concrete") {
+                    structuralDeckTypeSelect.value = "concrete";
+                    deckTypeChangedToConcrete = true; // Flag that deck type was changed
+                }
+            } else { 
+                dominantOpeningSelect.disabled = false;
+                if (airPerm === "true" && domOpening === "true") { 
+                    cpiSourceKey = 'dominant_opening_cpi';
+                } else { 
+                    cpiSourceKey = 'default_cpi';
+                }
+            }
+            
+            activeCpiCoefficients = { ...appSettings.internalPressureCoefficients[cpiSourceKey].zones };
+            console.log("DEBUG: Active Cpi Set based on Substrate Info:", cpiSourceKey, activeCpiCoefficients);
+
+            // If changing air permeability forced deck to concrete, dispatch change on deck select
+            // to update its related UI (pitch/bonding display)
+            if (deckTypeChangedToConcrete) {
+                structuralDeckTypeSelect.dispatchEvent(new Event('change'));
+            } else {
+                 // If deck type wasn't changed by this function, still recalculate table
+                calculateAndUpdateFlatRoofTable();
             }
         }
-
-        function restoreDefaultSettings() {
-            sessionStorage.removeItem(SESSION_STORAGE_KEY);
-            currentAppSettings = JSON.parse(JSON.stringify(defaultAppSettings)); // Deep copy defaults
-            console.log("Settings restored to defaults:", currentAppSettings);
-            settingsStatusDiv.textContent = "Settings restored to defaults.";
-            applySettingsToApp(currentAppSettings);
-        }
-
-        // --- End of Settings Management Functions ---
 
 
         // Function to calculate and update flat roof results table
         function calculateAndUpdateFlatRoofTable() {
+            console.log("DEBUG: calculateAndUpdateFlatRoofTable called"); 
             const peakVelocityPressureText = document.getElementById('resPeakVelocityPressure')?.textContent;
             const peakVelocityPressure = parseFloat(peakVelocityPressureText);
             const selectedFactorOfSafety = parseFloat(factorOfSafetySelect.value);
             
-            // Use Cpi from currentAppSettings if available, otherwise from flatRoofParams as fallback
-            const cpi = currentAppSettings.internalPressureCoefficient?.default_cpi || flatRoofParams.internalPressureCoefficient;
-
-            // Use Cpe from currentAppSettings (specifically "no_parapet" for now)
-            // This part needs to be more dynamic if we want to use other parapet settings from the table
-            const noParapetCpeSettings = currentAppSettings.flatRoofCpeParapets?.find(p => p.id === "no_parapet")?.zones || flatRoofParams.coefficients;
-
-
-            flatRoofParams.zones.forEach(zone => {
+            appSettings.zones.forEach(zone => {
                 document.getElementById(`gen_resultPressure_${zone}`).textContent = '-';
                 const fbResultCell = document.getElementById(`fb_resultPressure_${zone}`);
                 fbResultCell.textContent = '-';
                 fbResultCell.classList.remove('result-pass', 'result-fail');
                 document.getElementById(`ballastWeight_${zone}`).textContent = '-';
 
-                // Populate General Values table with current Cpe and Cpi being used
-                document.getElementById(`gen_cpe_${zone}`).textContent = (noParapetCpeSettings[zone] !== null ? noParapetCpeSettings[zone].toFixed(1) : '-');
-                document.getElementById(`gen_cpi_${zone}`).textContent = cpi.toFixed(1);
+                const cpeVal = activeCpeCoefficients ? activeCpeCoefficients[zone] : null;
+                const cpiVal = activeCpiCoefficients ? activeCpiCoefficients[zone] : null;
+
+                document.getElementById(`gen_cpe_${zone}`).textContent = (cpeVal !== null && typeof cpeVal !== 'undefined' ? cpeVal.toFixed(1) : '-');
+                document.getElementById(`gen_cpi_${zone}`).textContent = (cpiVal !== null && typeof cpiVal !== 'undefined' ? cpiVal.toFixed(1) : '-');
             });
 
             if (isNaN(peakVelocityPressure) || isNaN(selectedFactorOfSafety)) {
+                console.log("DEBUG: peakVelocityPressure or FoS is NaN. Aborting calculation."); 
                 return; 
             }
+            console.log(`DEBUG: PeakVelPressure: ${peakVelocityPressure}, FoS: ${selectedFactorOfSafety}`);
 
-            flatRoofParams.zones.forEach(zone => {
-                const cpe = noParapetCpeSettings[zone]; // Using "no_parapet" Cpe from settings
-                if (cpe === null) { // Skip if Cpe for this zone is not set
-                    document.getElementById(`gen_resultPressure_${zone}`).textContent = 'N/A (Cpe)';
-                    document.getElementById(`fb_resultPressure_${zone}`).textContent = 'N/A (Cpe)';
-                    document.getElementById(`ballastWeight_${zone}`).textContent = 'N/A (Cpe)';
+
+            appSettings.zones.forEach(zone => {
+                const cpe = activeCpeCoefficients[zone]; 
+                const cpi = activeCpiCoefficients[zone];
+
+                if (cpe === null || typeof cpe === 'undefined' || cpi === null || typeof cpi === 'undefined') { 
+                    console.warn(`DEBUG: CPE or CPI for zone ${zone} is null or undefined.`); 
+                    document.getElementById(`gen_resultPressure_${zone}`).textContent = 'N/A (Coef)';
+                    document.getElementById(`fb_resultPressure_${zone}`).textContent = 'N/A (Coef)';
+                    document.getElementById(`ballastWeight_${zone}`).textContent = 'N/A (Coef)';
                     return;
                 }
 
@@ -696,6 +814,9 @@
                 const pressureBeforeFoS = externalPressureComponent - internalPressureComponent;
                 const netDesignPressure = pressureBeforeFoS * selectedFactorOfSafety;
                 
+                console.log(`DEBUG: Zone ${zone} - Cpe: ${cpe}, Cpi: ${cpi}, ExtComp: ${externalPressureComponent}, IntComp: ${internalPressureComponent}, NetPressure: ${netDesignPressure}`);
+
+
                 document.getElementById(`gen_resultPressure_${zone}`).textContent = formatNumber(netDesignPressure, 2);
 
                 const fbResultCell = document.getElementById(`fb_resultPressure_${zone}`);
@@ -723,14 +844,14 @@
             });
         }
 
-        // Event Listeners for Settings Buttons
-        document.getElementById('saveSettingsButton')?.addEventListener('click', saveSettingsToSession);
-        document.getElementById('resetSettingsButton')?.addEventListener('click', restoreDefaultSettings);
         factorOfSafetySelect.addEventListener('change', calculateAndUpdateFlatRoofTable);
+        airPermeabilitySelect.addEventListener('change', updateCpiSettingsAndRecalculate);
+        dominantOpeningSelect.addEventListener('change', updateCpiSettingsAndRecalculate);
 
 
         // API Call and Form Logic
         document.getElementById('siteApiForm').addEventListener('submit', async function(event) {
+            console.log("DEBUG: siteApiForm submit event triggered."); 
             event.preventDefault();
             const postcode = document.getElementById('postcode').value;
             const overallBuildingHeight = document.getElementById('buildingHeight').value;
@@ -767,22 +888,27 @@
             }
 
             const apiKey = "02CCE87B-72B4-4EFD-99EA-1C4DE674DAF8"; 
+            const apiRequestUrl = `https://velventi.cadsglobal.com/api/v1.1/fetch/BasicReport?apiKey=${apiKey}&rf=xml&bh=${overallBuildingHeight}&pc=${encodeURIComponent(postcode)}`;
+            console.log("DEBUG: Attempting API call to:", apiRequestUrl); 
 
             try {
-                const apiRequestUrl = `https://velventi.cadsglobal.com/api/v1.1/fetch/BasicReport?apiKey=${apiKey}&rf=xml&bh=${overallBuildingHeight}&pc=${encodeURIComponent(postcode)}`;
                 const velventiResponse = await fetch(apiRequestUrl);
+                console.log("DEBUG: API response status:", velventiResponse.status); 
 
                 if (!velventiResponse.ok) {
                     let errorDetail = `HTTP error! status: ${velventiResponse.status} ${velventiResponse.statusText}`;
                      try {
                         const errorXmlText = await velventiResponse.text();
+                        console.log("DEBUG: API error response text:", errorXmlText); 
                         const errorParser = new DOMParser();
                         const errorXmlDoc = errorParser.parseFromString(errorXmlText, "application/xml");
                         const serviceErrorNode = errorXmlDoc.querySelector("ServiceStatus Error");
                         if (serviceErrorNode && serviceErrorNode.textContent && serviceErrorNode.textContent.trim() !== "") {
                             errorDetail = `API Error: ${serviceErrorNode.textContent.trim()}`;
                         }
-                    } catch (e) { /* Ignore */ }
+                    } catch (e) { 
+                        console.error("DEBUG: Error parsing API error response:", e); 
+                    }
                     throw new Error(errorDetail);
                 }
 
@@ -835,7 +961,7 @@
                     calculateAndUpdateFlatRoofTable();
                 }
             } catch (error) {
-                console.error('Operation Error:', error);
+                console.error('Operation Error in API call:', error); 
                 responseMessageDiv.textContent = `${error.message}`; 
                 responseMessageDiv.className = 'mt-6 text-center text-sm text-red-600';
                 resultsSection.classList.remove('loaded'); 
@@ -856,48 +982,52 @@
         function calculateAndDisplayParapetRatio() {
             const bhValue = parseFloat(buildingHeightInput.value);
             const phValue = parseFloat(parapetHeightInput.value);
+            let selectedCpeKey = 'no_parapet'; 
 
             if (isNaN(phValue) || phValue < 0) {
                 parapetRatioDisplayDiv.style.display = 'none';
                 parapetRatioValueSpan.textContent = '-';
                 parapetVariableInfoDiv.textContent = '';
-                return;
-            }
-            if (isNaN(bhValue) || bhValue <= 0) {
+            } else if (isNaN(bhValue) || bhValue <= 0) {
                 parapetRatioDisplayDiv.style.display = 'block';
                 parapetRatioValueSpan.textContent = 'N/A';
                 parapetVariableInfoDiv.textContent = 'Valid Building Height required for ratio.';
-                return;
-            }
-
-            parapetRatioDisplayDiv.style.display = 'block';
-            const ratio = phValue / bhValue;
-            parapetRatioValueSpan.textContent = ratio.toFixed(2);
-
-            if (ratio < 0.05) {
-                parapetVariableInfoDiv.textContent = "Parapet height insignificant";
-            } else if (ratio >= 0.05 && ratio < 0.1) {
-                parapetVariableInfoDiv.textContent = "Parapet variable = 0.05";
-            } else if (ratio >= 0.1 && ratio < 0.2) {
-                parapetVariableInfoDiv.textContent = "Parapet variable = 0.1";
-            } else if (ratio >= 0.2) {
-                parapetVariableInfoDiv.textContent = "Parapet variable = 0.2";
             } else {
-                parapetVariableInfoDiv.textContent = "";
+                parapetRatioDisplayDiv.style.display = 'block';
+                const ratio = phValue / bhValue;
+                parapetRatioValueSpan.textContent = ratio.toFixed(2);
+
+                if (ratio < 0.05) {
+                    parapetVariableInfoDiv.textContent = "Parapet height insignificant (using 'No Parapet' Cpe)";
+                    selectedCpeKey = 'no_parapet';
+                } else if (ratio >= 0.05 && ratio < 0.10) {
+                    parapetVariableInfoDiv.textContent = "Parapet variable = 0.05 (using 'Parapet ~0.05' Cpe)";
+                    selectedCpeKey = 'parapet_005';
+                } else if (ratio >= 0.10 && ratio < 0.20) {
+                    parapetVariableInfoDiv.textContent = "Parapet variable = 0.10 (using 'Parapet ~0.10' Cpe)";
+                    selectedCpeKey = 'parapet_010';
+                } else if (ratio >= 0.20) {
+                    parapetVariableInfoDiv.textContent = "Parapet variable = 0.20 (using 'Parapet ~0.20' Cpe)";
+                    selectedCpeKey = 'parapet_020';
+                }
             }
-            // Important: After parapet ratio changes, Cpe values might need to be re-selected from settings.
-            // For now, we are always using "no_parapet" Cpe. This would be an enhancement.
-            // calculateAndUpdateFlatRoofTable(); // Could trigger re-calc if Cpe depends on this.
+            activeCpeCoefficients = { ...(appSettings.cpeByParapetRatio[selectedCpeKey] || appSettings.cpeByParapetRatio.no_parapet) }; 
+            console.log("DEBUG: Active Cpe Set based on Parapet Ratio:", selectedCpeKey, activeCpeCoefficients); 
+            calculateAndUpdateFlatRoofTable();
         }
         buildingHeightInput.addEventListener('input', calculateAndDisplayParapetRatio);
         parapetHeightInput.addEventListener('input', calculateAndDisplayParapetRatio);
 
         // Initial DOMContentLoaded setup
-        document.addEventListener('DOMContentLoaded', async () => { // Made async for settings load
+        document.addEventListener('DOMContentLoaded', () => { 
             document.getElementById('currentYear').textContent = new Date().getFullYear(); 
             
-            await initializeSettings(); // Load and apply settings
+            populateStructuralDeckDropdown(); 
+            populateSettingsTables(); 
 
+            updateCpiSettingsAndRecalculate(); 
+            calculateAndDisplayParapetRatio(); 
+                                            
             const defaultTabId = 'dataInputContent';
             const defaultDesktopTab = document.querySelector(`.tab-button[data-tab="${defaultTabId}"]`);
             const defaultMobileLink = document.querySelector(`.tab-link[data-tab="${defaultTabId}"]`);
@@ -911,9 +1041,6 @@
             });
             if (defaultDesktopTab) defaultDesktopTab.classList.add('active-tab');
             if (defaultMobileLink) defaultMobileLink.classList.add('active-tab-mobile');
-            
-            calculateAndDisplayParapetRatio();
-            // calculateAndUpdateFlatRoofTable(); // Already called by initializeSettings
         });
 
     </script>
