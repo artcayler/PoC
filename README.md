@@ -1,2 +1,2 @@
 # PoC
-Proof of Concept for WUC
+Proof of Concept for TS portal with live online functionalities
