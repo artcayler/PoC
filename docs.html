@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polytec - Documentation & Guides</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* bg-gray-100 */
+        }
+        /* --- Main Site Header Styles --- */
+        .top-menu-item { 
+            padding: 0.75rem 1.0rem; cursor: pointer; border-bottom: 3px solid transparent;
+            transition: all 0.3s ease; color: #d1d5db; text-decoration: none;
+            display: inline-flex; align-items: center; font-size: 0.875rem; /* text-sm */
+        }
+        .top-menu-item:hover { color: #ffffff; border-bottom-color: #4b5563; }
+        .top-menu-item.active-menu-link {
+            color: #ffffff; border-bottom-color: #4f46e5; font-weight: 600;
+        }
+        .portal-button-nav {
+            padding: 0.65rem 1.25rem; margin-right: 0.5rem; background-color: #374151;
+            color: white; border: 1px solid #4b5563; border-radius: 0.375rem;
+            text-decoration: none; transition: background-color 0.3s ease; font-size: 0.875rem;
+        }
+        .portal-button-nav:hover { background-color: #4b5563; }
+        .portal-button-nav.active-menu-link { background-color: #4f46e5; border-color: #4338ca;}
+
+        .dropdown-menu {
+            position: absolute; top: 100%; left: 0; background-color: #374151;
+            border-radius: 0.375rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+            z-index: 50; min-width: 200px; padding-top: 0.5rem; padding-bottom: 0.5rem;
+        }
+        .dropdown-menu a { display: block; padding: 0.5rem 1rem; color: #d1d5db; text-decoration: none; font-size: 0.875rem;}
+        .dropdown-menu a:hover { background-color: #4b5563; color: #ffffff; }
+        .dropdown-menu a.active-sub-menu-link { background-color: #4f46e5; color: #ffffff; font-weight: 500; }
+
+
+        /* Mobile main nav */
+        .mobile-main-nav-link { display: block; padding: 0.75rem 1rem; color: #d1d5db; text-decoration: none; font-size: 0.875rem; }
+        .mobile-main-nav-link:hover, .mobile-main-nav-link.active-menu-link-mobile { background-color: #4b5563; color: #ffffff; }
+        .mobile-main-portal-button {
+            display: block; padding: 0.75rem 1rem; margin: 0.5rem 1rem; background-color: #4f46e5;
+            color: white; border-radius: 0.375rem; text-align: center; text-decoration: none; font-size: 0.875rem;
+        }
+        .mobile-main-portal-button.active-menu-link-mobile { background-color: #4338ca; }
+        
+        .mobile-dropdown-toggle { cursor: pointer; }
+        .mobile-dropdown-content { padding-left: 1rem; background-color: #374151; } /* Matches dropdown-menu bg */
+        .mobile-dropdown-content a { font-size: 0.875rem; }
+        .mobile-dropdown-content a.active-sub-menu-link-mobile { background-color: #6366f1; color: #ffffff; }
+
+
+        /* --- Docs Page Internal Sub-Navigation Header Styles --- */
+        .docs-sub-nav {
+            background-color: #4b5563; /* gray-600, slightly lighter than main nav bg */
+            color: #e5e7eb; 
+            position: sticky;
+            /* top value will be set by JS based on main header height */
+            z-index: 40; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        #docsSubNavLinksContainer {
+            transition: max-height 0.3s ease-in-out;
+        }
+        .docs-sub-nav-links-desktop { /* Styles for desktop horizontal layout */
+            display: flex;
+            overflow-x: auto; 
+            -ms-overflow-style: none;  
+            scrollbar-width: none;  
+        }
+        .docs-sub-nav-links-desktop::-webkit-scrollbar { display: none; }
+
+        .docs-sub-nav-link {
+            padding: 0.75rem 1rem; white-space: nowrap; text-decoration: none;
+            color: #d1d5db; border-bottom: 3px solid transparent;
+            transition: color 0.3s ease, border-color 0.3s ease; font-size: 0.875rem; 
+        }
+        .docs-sub-nav-link:hover { color: #ffffff; border-bottom-color: #9ca3af; }
+        .docs-sub-nav-link.active-docs-section-link {
+            color: #ffffff; font-weight: 600; border-bottom-color: #a5b4fc; 
+        }
+
+        /* Mobile dropdown styles for sub-nav */
+        .docs-sub-nav-mobile-dropdown { /* This class is added by JS when mobile menu is open */
+            display: block !important; 
+            background-color: #4b5563; /* Same as sub-nav bar */
+            max-height: 0;
+            overflow-y: auto; /* Allow scrolling if many items */
+            width: 100%; /* Full width for dropdown */
+        }
+        .docs-sub-nav-mobile-dropdown.open { max-height: calc(100vh - 120px); /* Example max height, adjust as needed */ }
+        .docs-sub-nav-mobile-dropdown .docs-sub-nav-link {
+            display: block; width: 100%; padding: 0.75rem 1.5rem; 
+            border-bottom: 1px solid #374151; /* Darker separator */
+        }
+        .docs-sub-nav-mobile-dropdown .docs-sub-nav-link:last-child { border-bottom: none; }
+        
+        /* Content offset */
+        .content-section {
+            /* Will be set by JS: mainHeaderHeight + subNavHeight + buffer */
+            padding-top: 130px; /* Initial fallback, JS will override */
+            margin-top: -130px; 
+        }
+        /* Original content styling from old docs.html */
+        .content-section h2 {
+            font-size: 1.75rem; font-weight: 600; color: #1f2937;
+            margin-bottom: 1rem; border-bottom: 1px solid #d1d5db; padding-bottom: 0.5rem;
+        }
+        .content-section p, .content-section ul {
+            margin-bottom: 1rem; line-height: 1.6; color: #4b5563;
+        }
+        .content-section ul { list-style-type: disc; margin-left: 1.5rem; }
+        .content-section a.doc-link { color: #4f46e5; text-decoration: underline; }
+        .content-section a.doc-link:hover { color: #3730a3; }
+
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <header class="bg-gray-800 text-white shadow-md sticky top-0 z-50" id="mainSiteHeader">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <a href="index.html" class="text-xl font-bold hover:text-indigo-300 transition-colors">Polytec Hub</a>
+            <button id="mainMobileMenuButton" class="md:hidden p-2 rounded hover:bg-gray-700 focus:outline-none focus:bg-gray-700" aria-expanded="false" aria-controls="mainMobileNav">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+            </button>
+            <nav id="mainDesktopNav" class="hidden md:flex items-center space-x-1">
+                <a href="index.html" class="portal-button-nav">Portal</a>
+                <a href="tools.html" class="top-menu-item">Tools Section</a>
+                <div class="relative group">
+                    <button id="infosDesktopDropdownToggle" class="top-menu-item active-menu-link" aria-expanded="true">
+                        Infos
+                        <svg class="w-4 h-4 ml-1.5 fill-current" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" fill-rule="evenodd"></path></svg>
+                    </button>
+                    <div id="infosDesktopDropdown" class="dropdown-menu">
+                        <a href="docs.html" class="active-sub-menu-link">Docs & Guides</a>
+                        <a href="index.html#forum" data-page="forum" class="load-content-index">Forum (Soon)</a>
+                    </div>
+                </div>
+                <a href="index.html#contact" data-page="contact" class="top-menu-item load-content-index">Contact</a>
+            </nav>
+        </div>
+        <nav id="mainMobileNav" class="md:hidden hidden bg-gray-700 pb-2">
+            <a href="index.html" data-page="portal" class="mobile-main-portal-button">Portal</a>
+            <a href="tools.html" class="mobile-main-nav-link">Tools Section</a>
+            <div> 
+                <button id="infosMobileDropdownToggle" class="mobile-main-nav-link mobile-dropdown-toggle w-full text-left flex justify-between items-center active-menu-link-mobile" aria-expanded="true">
+                    Infos <svg class="w-5 h-5 transform transition-transform duration-200 rotate-180" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                </button>
+                <div id="infosMobileDropdown" class="mobile-dropdown-content">
+                    <a href="docs.html" class="mobile-main-nav-link active-sub-menu-link-mobile">Docs & Guides</a>
+                    <a href="index.html#forum" data-page="forum" class="mobile-main-nav-link load-content-index">Forum (Soon)</a>
+                </div>
+            </div>
+            <a href="index.html#contact" data-page="contact" class="mobile-main-nav-link load-content-index">Contact</a>
+        </nav>
+    </header>
+
+    <nav class="docs-sub-nav" id="docsSubNav">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <span class="md:hidden text-white font-semibold py-2">Document Sections</span>
+            <button id="docsSubNavMobileButton" class="md:hidden p-2 rounded text-white hover:bg-gray-500 focus:outline-none" aria-expanded="false" aria-controls="docsSubNavLinksContainer">
+                <svg class="w-6 h-6 fill-current" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path></svg>
+            </button>
+            <div id="docsSubNavLinksContainer" class="hidden md:flex flex-1 md:justify-start docs-sub-nav-links-desktop">
+                <a href="#fire" class="docs-sub-nav-link">Fire</a>
+                <a href="#guides" class="docs-sub-nav-link">Guides</a>
+                <a href="#bulletins" class="docs-sub-nav-link">Bulletins</a>
+                <a href="#bba-certs" class="docs-sub-nav-link">BBA Certs</a>
+                <a href="#datasheets" class="docs-sub-nav-link">Datasheets</a>
+                <a href="#sds" class="docs-sub-nav-link">SDS</a>
+                <a href="#dop-portal" class="docs-sub-nav-link">DoP Portal</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto p-8 flex-grow"> 
+        <div class="bg-white p-8 rounded-lg shadow-lg w-full">
+            
+            <section id="fire" class="content-section mb-12">
+                <h2>Fire Documentation</h2>
+                <p>Find all relevant documents related to fire safety, testing, and compliance for our products and systems.</p>
+                <ul>
+                    <li><a href="files/fire-safety-guide.pdf" target="_blank" class="doc-link">Comprehensive Fire Safety Guide (PDF - local file)</a></li>
+                    <li><a href="https://www.gov.uk/government/collections/fire-safety-design-for-schools" target="_blank" class="doc-link">External Link: UK Gov Fire Safety Design for Schools</a></li>
+                    <li>Placeholder for another fire document.</li>
+                </ul>
+            </section>
+
+            <section id="guides" class="content-section mb-12">
+                <h2>Installation & Application Guides</h2>
+                <p>Detailed guides to help you with the correct installation and application of our products.</p>
+                 <ul>
+                    <li><a href="files/installation-manual-product-x.pdf" target="_blank" class="doc-link">Installation Manual for Product X (PDF - local file)</a></li>
+                    <li><a href="https://www.external-guides.com/best-practices" target="_blank" class="doc-link">External Link: Best Practice Installation Techniques</a></li>
+                    <li>Placeholder for another guide.</li>
+                </ul>
+            </section>
+
+            <section id="bulletins" class="content-section mb-12">
+                <h2>Technical Bulletins</h2>
+                <p>Stay updated with our latest technical bulletins, providing information on product updates, new research, and important notices.</p>
+                 <ul>
+                    <li><a href="files/Technical Bulletin SIPs May 2025 .pdf" target="_blank" class="doc-link">SIPs Technical Bulletin May 2025 (PDF - local file)</a></li>
+                    <li>Placeholder for another bulletin.</li>
+                </ul>
+            </section>
+
+            <section id="bba-certs" class="content-section mb-12">
+                <h2>BBA Certificates</h2>
+                <p>Access all current BBA (British Board of Agrément) certificates for our certified products and systems.</p>
+                 <ul>
+                    <li><a href="files/05-4287 Armourplan SM Issue 8 May 2025.pdf" target="_blank" class="doc-link">Armourplan SM May 2025 (PDF - local file)</a></li>
+		            <li><a href="files/05-4287 Armourplan P Issue 6 May 2025.pdf" target="_blank" class="doc-link">Armourplan P May 2025 (PDF - local file)</a></li>
+		            <li><a href="files/05-4287 Armourplan SG Issue 6 May 2025.pdf" target="_blank" class="doc-link">Armourplan SG May 2025 (PDF - local file)</a></li>
+		            <li><a href="files/05-4287 Armourplan PSG Issue 5 May 2025.pdf" target="_blank" class="doc-link">Armourplan PSG May 2025 (PDF - local file)</a></li>
+		            <li><a href="https://www.bbacerts.co.uk/" target="_blank" class="doc-link">External Link: Search BBA Certificates Online</a></li>
+                </ul>
+            </section>
+
+            <section id="datasheets" class="content-section mb-12">
+                <h2>Product Datasheets</h2>
+                <p>Download technical datasheets for our full range of products, detailing specifications, performance data, and application areas.</p>
+                <ul>
+                    <li><a href="files/datasheet-product-a.pdf" target="_blank" class="doc-link">Datasheet for Product A (PDF - local file)</a></li>
+                    <li><a href="files/datasheet-product-b.pdf" target="_blank" class="doc-link">Datasheet for Product B (PDF - local file)</a></li>
+                </ul>
+            </section>
+
+            <section id="sds" class="content-section mb-12">
+                <h2>Safety Datasheets (SDS)</h2>
+                <p>Find Safety Datasheets for our chemical products, providing information on safe handling, storage, and emergency measures.</p>
+                <ul>
+                    <li><a href="files/68240005 PVC Refurb Primer.pdf" target="_blank" class="doc-link">PVC Refurbishment Primer May 2025 (PDF - local file)</a></li>
+                </ul>
+            </section>
+
+            <section id="dop-portal" class="content-section mb-12">
+                <h2>Declaration of Performance (DoP) Portal</h2>
+                <p>Access Declarations of Performance for our construction products as required by relevant regulations.</p>
+                <ul>
+                    <li><a href="https://www.ikodop.eu/BrandSelection.aspx?r=GB" target="_blank" class="doc-link">External Link: IKO DoP Portal (GB)</a></li>
+                </ul>
+            </section>
+
+        </div>
+    </main>
+
+    <footer class="bg-gray-700 text-gray-300 text-center p-4 mt-auto">
+        <p>&copy; <span id="currentYear"></span> Cayler. All rights reserved.</p>
+    </footer>
+
+    <script>
+        let mainHeaderHeight = 56; // Fallback default
+        let docsSubNavHeight = 48; // Fallback default
+        let totalStickyOffset = mainHeaderHeight + docsSubNavHeight;
+
+        function calculateStickyOffset() {
+            const mainHeader = document.getElementById('mainSiteHeader');
+            const docsSubNavElement = document.getElementById('docsSubNav');
+            
+            if(mainHeader) mainHeaderHeight = mainHeader.offsetHeight;
+            if(docsSubNavElement) {
+                docsSubNavElement.style.top = mainHeaderHeight + 'px';
+                docsSubNavHeight = docsSubNavElement.offsetHeight;
+            }
+            totalStickyOffset = mainHeaderHeight + docsSubNavHeight;
+            
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.style.paddingTop = (totalStickyOffset + 20) + 'px'; // +20 for buffer
+                section.style.marginTop = -(totalStickyOffset + 20) + 'px';
+            });
+        }
+
+        // --- Main Site Mobile Menu Toggle Logic ---
+        const mainMobileMenuButton = document.getElementById('mainMobileMenuButton');
+        const mainMobileNav = document.getElementById('mainMobileNav');
+        if (mainMobileMenuButton && mainMobileNav) { 
+            mainMobileMenuButton.addEventListener('click', () => {
+                const isHidden = mainMobileNav.classList.contains('hidden');
+                mainMobileNav.classList.toggle('hidden');
+                mainMobileMenuButton.setAttribute('aria-expanded', String(!isHidden));
+                if (!isHidden) { 
+                    if (infosMobileDropdown && !infosMobileDropdown.classList.contains('hidden')) {
+                        toggleMainMobileDropdown(infosMobileBtn, infosMobileDropdown, infosMobileBtn.querySelector('svg'));
+                    }
+                }
+            });
+        }
+        
+        const infosDesktopBtn = document.getElementById('infosDesktopDropdownToggle');
+        const infosDesktopDropdown = document.getElementById('infosDesktopDropdown');
+        if (infosDesktopBtn && infosDesktopDropdown) { 
+            infosDesktopBtn.addEventListener('click', (event) => {
+                event.stopPropagation(); 
+                infosDesktopDropdown.classList.toggle('hidden');
+                infosDesktopBtn.setAttribute('aria-expanded', String(!infosDesktopDropdown.classList.contains('hidden')));
+            });
+        }
+        document.addEventListener('click', (event) => { 
+             if (infosDesktopDropdown && !infosDesktopDropdown.classList.contains('hidden') && infosDesktopBtn && !infosDesktopBtn.contains(event.target) && !infosDesktopDropdown.contains(event.target)) {
+                infosDesktopDropdown.classList.add('hidden');
+                infosDesktopBtn.setAttribute('aria-expanded', 'false');
+            }
+        });
+
+        function toggleMainMobileDropdown(buttonElement, dropdownElement, iconElement) { 
+            const isHidden = dropdownElement.classList.contains('hidden');
+            dropdownElement.classList.toggle('hidden');
+            buttonElement.setAttribute('aria-expanded', String(!isHidden));
+            if (iconElement) iconElement.classList.toggle('rotate-180', !isHidden);
+        }
+        const infosMobileBtn = document.getElementById('infosMobileDropdownToggle');
+        const infosMobileDropdown = document.getElementById('infosMobileDropdown');
+        if (infosMobileBtn && infosMobileDropdown) { 
+             infosMobileBtn.addEventListener('click', () => {
+                 toggleMainMobileDropdown(infosMobileBtn, infosMobileDropdown, infosMobileBtn.querySelector('svg'));
+            });
+        }
+
+        // --- Docs Page Specific JavaScript ---
+        const docsSubNavMobileButton = document.getElementById('docsSubNavMobileButton');
+        const docsSubNavLinksContainer = document.getElementById('docsSubNavLinksContainer');
+        const subNavLinks = docsSubNavLinksContainer.querySelectorAll('.docs-sub-nav-link');
+        const contentSections = document.querySelectorAll('.content-section');
+        
+        if (docsSubNavMobileButton && docsSubNavLinksContainer) {
+            docsSubNavMobileButton.addEventListener('click', () => {
+                const isHidden = docsSubNavLinksContainer.classList.contains('hidden');
+                docsSubNavLinksContainer.classList.toggle('hidden'); // Basic toggle for md:hidden
+                docsSubNavMobileButton.setAttribute('aria-expanded', String(!isHidden));
+                
+                // Apply/remove classes for mobile dropdown appearance
+                if (!isHidden) { // If it was just opened (hidden removed by toggle)
+                    docsSubNavLinksContainer.classList.remove('docs-sub-nav-links-desktop', 'md:flex');
+                    docsSubNavLinksContainer.classList.add('docs-sub-nav-mobile-dropdown', 'open');
+                } else { // If it was just closed (hidden added by toggle)
+                     docsSubNavLinksContainer.classList.remove('docs-sub-nav-mobile-dropdown', 'open');
+                     docsSubNavLinksContainer.classList.add('docs-sub-nav-links-desktop','md:flex');
+                }
+                calculateStickyOffset(); // Recalculate offset in case subnav height changes (not typical for this setup but good practice)
+            });
+        }
+
+        subNavLinks.forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+
+                if (targetElement) {
+                    const elementPosition = targetElement.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - totalStickyOffset + 15; 
+
+                    window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+                }
+                if (docsSubNavLinksContainer && docsSubNavLinksContainer.classList.contains('open')) {
+                    docsSubNavLinksContainer.classList.add('hidden');
+                    docsSubNavLinksContainer.classList.remove('docs-sub-nav-mobile-dropdown', 'open');
+                     docsSubNavLinksContainer.classList.add('docs-sub-nav-links-desktop','md:flex');
+                    if(docsSubNavMobileButton) docsSubNavMobileButton.setAttribute('aria-expanded', 'false');
+                }
+                if (mainMobileNav && !mainMobileNav.classList.contains('hidden')) {
+                    mainMobileNav.classList.add('hidden');
+                    if(mainMobileMenuButton) mainMobileMenuButton.setAttribute('aria-expanded', 'false');
+                }
+            });
+        });
+
+        function updateActiveSubNavLink() {
+            if (!docsSubNavLinksContainer) return; // Check if subNav exists
+            let currentSectionId = '';
+            contentSections.forEach(section => {
+                const sectionTop = section.offsetTop - totalStickyOffset - 20; 
+                if (window.pageYOffset >= sectionTop) {
+                    currentSectionId = '#' + section.getAttribute('id');
+                }
+            });
+            subNavLinks.forEach(link => {
+                link.classList.remove('active-docs-section-link');
+                if (link.getAttribute('href') === currentSectionId) {
+                    link.classList.add('active-docs-section-link');
+                }
+            });
+        }
+        
+        window.addEventListener('scroll', updateActiveSubNavLink);
+        window.addEventListener('resize', calculateStickyOffset); 
+        
+        document.addEventListener('DOMContentLoaded', () => { 
+            const currentYearSpan = document.getElementById('currentYear');
+            if(currentYearSpan) currentYearSpan.textContent = new Date().getFullYear(); 
+            
+            calculateStickyOffset(); 
+            updateActiveSubNavLink(); 
+            
+            if (infosDesktopDropdown && infosDesktopBtn && window.location.pathname.includes('docs.html')) {
+                 infosDesktopDropdown.classList.remove('hidden');
+                 infosDesktopBtn.setAttribute('aria-expanded', 'true');
+            }
+            if (infosMobileDropdown && infosMobileBtn && window.location.pathname.includes('docs.html')) {
+                infosMobileDropdown.classList.remove('hidden');
+                infosMobileBtn.setAttribute('aria-expanded', 'true');
+                infosMobileBtn.classList.add('active-menu-link-mobile'); 
+                const icon = infosMobileBtn.querySelector('svg');
+                if (icon) icon.classList.add('rotate-180'); 
+            }
+
+            // Initial check for URL hash and scroll to section if present
+            if (window.location.hash) {
+                const targetElement = document.querySelector(window.location.hash);
+                if (targetElement) {
+                     setTimeout(() => { // Timeout to ensure layout is stable
+                        const elementPosition = targetElement.getBoundingClientRect().top;
+                        const offsetPosition = elementPosition + window.pageYOffset - totalStickyOffset + 15;
+                        window.scrollTo({ top: offsetPosition, behavior: 'auto' }); // 'auto' for initial load
+                    }, 100);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

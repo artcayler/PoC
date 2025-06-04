@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wind Load Calculator - Polytec Tools</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        .breadcrumb-link { color: #4f46e5; text-decoration: none; }
+        .breadcrumb-link:hover { text-decoration: underline; }
+        .back-to-tools-btn {
+            padding: 0.5rem 1rem; background-color: #64748b; color: white;
+            border-radius: 0.375rem; text-decoration: none; transition: background-color 0.3s ease;
+            font-weight: 500;
+        }
+        .back-to-tools-btn:hover { background-color: #475569; }
+        .page-section {
+            background-color: white; padding: 1.5rem; border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+            margin-bottom: 2rem;
+        }
+        .section-title {
+            font-size: 1.25rem; font-weight: 600; color: #1f2937;
+            margin-bottom: 1rem; border-bottom: 1px solid #e5e7eb; padding-bottom: 0.5rem;
+        }
+        .form-input, .form-select {
+            width: 100%; padding: 0.65rem 0.75rem; border: 1px solid #d1d5db;
+            border-radius: 0.375rem; box-shadow: inset 0 1px 2px 0 rgba(0,0,0,0.05);
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+        .form-input:focus, .form-select:focus {
+            border-color: #4f46e5; outline: none;
+            box-shadow: 0 0 0 0.2rem rgba(79, 70, 229, 0.25);
+        }
+        .form-input.error-field, .form-select.error-field { border-color: #ef4444; }
+        select:disabled { background-color: #e5e7eb; color: #6b7280; cursor: not-allowed; opacity: 0.7; }
+        input:disabled { background-color: #f3f4f6; color: #9ca3af; cursor: not-allowed; opacity: 0.7;}
+
+        .form-label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151; }
+        .form-group { margin-bottom: 1rem; } 
+        .form-grid-dynamic { display: grid; grid-template-columns: repeat(1, 1fr); gap: 1rem; }
+        @media (min-width: 640px) { .form-grid-dynamic { grid-template-columns: repeat(2, 1fr); } }
+        @media (min-width: 1024px) { .form-grid-dynamic { grid-template-columns: repeat(4, 1fr); } }
+
+        .action-btn {
+            font-weight: 600; padding: 0.6rem 1.2rem; border-radius: 0.375rem;
+            transition: background-color 0.3s; border: 1px solid transparent; cursor: pointer;
+        }
+        .fetch-btn { background-color: #10b981; color: white; }
+        .fetch-btn:hover { background-color: #059669; }
+        .save-roof-btn { background-color: #4f46e5; color: white; margin-top:1.5rem; }
+        .save-roof-btn:hover { background-color: #4338ca; }
+        .disabled-btn { opacity: 0.5; cursor: not-allowed !important; }
+
+        .project-info-bar { font-size: 0.9rem; color: #4b5563; }
+        .project-info-bar strong { color: #1e3a8a; }
+        .deck-details-display, .coeff-display {
+            background-color: #eef2ff; padding: 0.75rem; border-radius: 0.25rem;
+            border-left: 3px solid #4f46e5; font-size: 0.875rem; color: #4338ca; margin-top: 0.5rem;
+        }
+        .api-results-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 0.75rem 1.5rem; font-size: 0.875rem; }
+        .api-results-grid div > strong { color: #374151; }
+
+        .saved-roof-item { border: 1px solid #e5e7eb; padding: 1rem; border-radius: 0.375rem; margin-bottom:1.5rem; }
+        .saved-roof-item h4 { font-size: 1.1rem; font-weight: 600; color: #374151; margin-bottom: 0.75rem;}
+        .saved-roof-details { font-size: 0.875rem; color: #4b5563; display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.25rem 1rem; }
+        .loader {
+            border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%;
+            width: 20px; height: 20px; animation: spin 1s linear infinite; display: inline-block; margin-left: 8px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .warning-message { background-color: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 0.75rem; border-radius: 0.25rem; font-size: 0.875rem; margin-top: 0.5rem;}
+        
+        .results-table { width: 100%; margin-top: 1rem; border-collapse: collapse; font-size: 0.875rem; }
+        .results-table th, .results-table td { border: 1px solid #d1d5db; padding: 0.5rem; text-align: right; }
+        .results-table th { background-color: #f3f4f6; font-weight: 600; }
+        .results-table td.row-title { text-align: left; font-weight: 500; white-space: nowrap;}
+        .result-pass { background-color: #dcfce7 !important; color: #166534 !important; font-weight: bold; }
+        .result-fail { background-color: #fee2e2 !important; color: #991b1b !important; font-weight: bold; }
+        .calc-subheader { font-size: 1rem; font-weight: 600; color: #374151; margin-top: 1.25rem; margin-bottom: 0.75rem;}
+        .calc-subheader .fos-note { font-size: 0.75rem; color: #4b5563; font-weight: normal; }
+        #liveCalculationResultsDisplay { display: none; } 
+        .message-area-small { font-size: 0.8rem; padding: 0.5rem; margin-top: 0.5rem; min-height: 30px; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <header class="bg-gray-800 text-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <a href="index.html" class="text-xl font-bold hover:text-indigo-300">Polytec Hub</a>
+            <nav aria-label="Breadcrumb" class="hidden sm:inline-flex">
+                <ol class="list-none p-0 inline-flex text-sm">
+                    <li class="flex items-center"><a href="index.html" class="breadcrumb-link hover:text-indigo-200">Portal</a><svg class="fill-current w-3 h-3 mx-2 text-gray-500" viewBox="0 0 20 20"><path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"/></svg></li>
+                    <li class="flex items-center"><a href="tools.html" class="breadcrumb-link hover:text-indigo-200">Tools Section</a><svg class="fill-current w-3 h-3 mx-2 text-gray-500" viewBox="0 0 20 20"><path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"/></svg></li>
+                    <li class="flex items-center"><span class="text-gray-400">Wind Load Calculator</span></li>
+                </ol>
+            </nav>
+            <a href="tools.html" class="back-to-tools-btn text-sm">&larr; All Tools</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-6 flex-grow">
+        <div id="projectInfoDisplay" class="page-section project-info-bar flex flex-wrap justify-between items-center gap-2">
+            <span>SF Ref: <strong id="displaySFRef">-</strong></span>
+            <span>Project Name: <strong id="displayProjectName">-</strong></span>
+            <span>Project Postcode: <strong id="displayProjectPostcode">-</strong></span>
+        </div>
+
+        <div id="roofBasicDataSection" class="page-section">
+            <h2 class="section-title">Step 1: Roof & Site Data Input</h2>
+            <form id="roofDataForm">
+                 <div class="form-group">
+                    <label for="calcRoofName" class="form-label">Individual Roof Name/Identifier <span class="text-red-500">*</span></label>
+                    <input type="text" id="calcRoofName" class="form-input mb-4" placeholder="e.g., Main South Wing, Phase 2 Area B" required>
+                </div>
+                
+                <hr class="my-4 border-gray-300">
+                <h3 class="text-md font-semibold text-gray-700 mb-3">Site Location & API Data</h3>
+                <div class="form-grid-dynamic">
+                    <div class="form-group">
+                        <label for="calcPostcode" class="form-label">Site Postcode (for this roof) <span class="text-red-500">*</span></label>
+                        <input type="text" id="calcPostcode" class="form-input" placeholder="e.g., SW1A 1AA" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="calcHeight" class="form-label">Building Height (m) <span class="text-red-500">*</span></label>
+                        <input type="number" id="calcHeight" class="form-input" placeholder="e.g., 10.00" step="0.01" min="0.01" required>
+                    </div>
+                    <div class="form-group flex items-end">
+                        <button type="button" id="fetchSiteDataButton" class="action-btn fetch-btn w-full">Fetch Site Data <span id="apiLoadingSpinner" class="loader" style="display: none;"></span></button>
+                    </div>
+                    <div id="fetchStatusMessage" class="message-area-small flex items-end pb-1"></div>
+                </div>
+                <div id="dataChangeWarning" class="warning-message" style="display:none;">Postcode or Height changed. Please re-fetch site data for accurate calculations.</div>
+                
+                <hr class="my-6 border-gray-300">
+                <h3 class="text-md font-semibold text-gray-700 mb-3">Building & Roof Geometry</h3>
+                <div class="form-grid-dynamic">
+                    <div class="form-group">
+                        <label for="calcShorterDim" class="form-label">Shorter Plan Dimension (m) <span class="text-red-500">*</span></label>
+                        <input type="number" id="calcShorterDim" class="form-input" placeholder="e.g., 15.00" step="0.01" min="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="calcLongerDim" class="form-label">Longer Plan Dimension (m) <span class="text-red-500">*</span></label>
+                        <input type="number" id="calcLongerDim" class="form-input" placeholder="e.g., 30.00" step="0.01" min="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="calcParapet" class="form-label">Parapet Height (m)</label>
+                        <input type="number" id="calcParapet" class="form-input" placeholder="e.g., 0.50" step="0.01" min="0" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="calcRoofType" class="form-label">Roof Type <span class="text-red-500">*</span></label>
+                        <select id="calcRoofType" class="form-select" required>
+                            <option value="flat_5deg">Flat (1:80 to 5 degrees)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <hr class="my-6 border-gray-300">
+                <h3 class="text-md font-semibold text-gray-700 mb-3">Deck, Permeability & Safety Factor</h3>
+                <div class="form-grid-dynamic">
+                     <div class="form-group">
+                        <label for="calcDeckType" class="form-label">Structural Deck Type <span class="text-red-500">*</span></label>
+                        <select id="calcDeckType" class="form-select" required>
+                            <option value="">Select Deck...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="calcAirPerm" class="form-label">Air Permeability <span class="text-red-500">*</span></label>
+                        <select id="calcAirPerm" class="form-select" required>
+                            <option value="true">Yes</option> 
+                            <option value="false">No (Air Tight)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="calcDominantOpening" class="form-label">Dominant Opening <span class="text-red-500">*</span></label>
+                        <select id="calcDominantOpening" class="form-select" required>
+                            <option value="false">No</option>
+                            <option value="true">Yes (e.g., hanger)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="calcFoS" class="form-label">General Factor of Safety (FoS) <span class="text-red-500">*</span></label>
+                        <select id="calcFoS" class="form-select" required>
+                            <option value="1.35" selected>1.35</option>
+                            <option value="1.5">1.5</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="selectedDeckDetails" class="deck-details-display mt-2" style="display:none;">
+                    Pitch: <strong id="deckDetailPitch">-</strong> mm | 
+                    Bonding Area: <strong id="deckDetailBonding">-</strong> % |
+                    Max Allowable Uplift for Deck: <strong id="deckDetailMaxUplift">-</strong> kN/m²
+                </div>
+                 <div id="currentCpeCpiDisplay" class="coeff-display mt-2" style="display:none;">
+                    Selected Cpe (F/G/H/I): <strong id="displayCpeVals">-</strong> | 
+                    Selected Cpi (F/G/H/I): <strong id="displayCpiVals">-</strong>
+                </div>
+                <button type="button" id="saveRoofButton" class="action-btn save-roof-btn w-full md:w-auto">Save and Add Roof to Project</button>
+            </form>
+        </div>
+
+        <div id="liveCalculationResultsDisplay" class="page-section live-results-container" style="display:none;">
+            <h3 class="section-title">Live Calculation Preview (for current inputs)</h3>
+            <div id="liveResultsContent">
+                <p class="text-center text-gray-500 py-4">Enter all required roof data and fetch site data to see live calculations.</p>
+            </div>
+        </div>
+
+        <div id="savedRoofsSection" class="page-section" style="display:none;">
+            <h2 class="section-title">Step 2: Saved Roof Configurations & Results</h2>
+            <div class="project-info-bar mb-4">
+                For Project: <strong id="savedRoofsProjectName">-</strong> (SF Ref: <strong id="savedRoofsSFRef">-</strong>, Original Project Postcode: <strong id="savedRoofsProjectPostcode">-</strong>)
+            </div>
+            <div id="savedRoofsList"></div>
+        </div>
+
+        <div id="apiResultsDisplay" class="page-section" style="display:none;">
+            <h2 class="section-title">Fetched Site Data Details (For Current Postcode & Height)</h2>
+            <div class="api-results-grid">
+                <div><strong>API Status:</strong> <span id="resApiStatus">-</span></div>
+                <div><strong>Site Altitude (m):</strong> <span id="resSiteAltitude">-</span></div>
+                <div><strong>Distance To Sea (km):</strong> <span id="resDistanceToSea">-</span></div>
+                <div><strong>Distance Inside Town (km):</strong> <span id="resDistanceInsideTown">-</span></div>
+                <div><strong>Building Height (API) (m):</strong> <span id="resBuildingHeightApi">-</span></div>
+                <div><strong>Effective/Calc Height (m):</strong> <span id="resEffectiveCalcHeight">-</span></div>
+                <div><strong>Basic Wind Speed (m/s):</strong> <span id="resBasicWindSpeed">-</span></div>
+                <div><strong>Altitude Factor (Sa):</strong> <span id="resAltitudeFactor">-</span></div>
+                <div><strong>Directional Factor (Sdir):</strong> <span id="resDirectionalFactor">-</span></div>
+                <div><strong>Seasonal Factor (Ss):</strong> <span id="resSeasonalFactor">-</span></div>
+                <div><strong>Probability Factor (Sp):</strong> <span id="resProbabilityFactor">-</span></div>
+                <div><strong>Orography Factor (So):</strong> <span id="resOrographyFactor">-</span></div>
+                <div><strong>Exposure Factor (Ce(z)):</strong> <span id="resExposureFactor">-</span></div>
+                <div><strong>Exposure Correction Factor (Cexp):</strong> <span id="resExposureCorrectionFactor">-</span></div>
+                <div><strong>Peak Velocity Pressure (qp(z), kPa):</strong> <span id="resPeakVelocityPressure">-</span></div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-gray-700 text-gray-300 text-center p-4 mt-auto">
+        <p>&copy; <span id="currentYear"></span> Cayler. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // --- START Polytec Wind Uplift Calculator Logic for t_wind_load.html ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const ZONES = ['F', 'G', 'H', 'I'];
+            const FOS_BALLAST = 1.5; // Fixed FoS for Ballast calculations
+            // --- DOM Elements ---
+            const currentYearSpan = document.getElementById('currentYear');
+            const displaySFRef = document.getElementById('displaySFRef'), displayProjectName = document.getElementById('displayProjectName'), displayProjectPostcode = document.getElementById('displayProjectPostcode');
+            const roofDataForm = document.getElementById('roofDataForm');
+            const calcRoofName = document.getElementById('calcRoofName'); 
+            const calcPostcode = document.getElementById('calcPostcode'), calcHeight = document.getElementById('calcHeight'), calcParapet = document.getElementById('calcParapet');
+            const calcShorterDim = document.getElementById('calcShorterDim'), calcLongerDim = document.getElementById('calcLongerDim'), calcFoS = document.getElementById('calcFoS');
+            const calcRoofType = document.getElementById('calcRoofType'), calcAirPerm = document.getElementById('calcAirPerm'), calcDominantOpening = document.getElementById('calcDominantOpening');
+            const calcDeckType = document.getElementById('calcDeckType');
+            const fetchSiteDataButton = document.getElementById('fetchSiteDataButton'), apiLoadingSpinner = document.getElementById('apiLoadingSpinner'), dataChangeWarning = document.getElementById('dataChangeWarning');
+            const fetchStatusMessage = document.getElementById('fetchStatusMessage');
+            const selectedDeckDetails = document.getElementById('selectedDeckDetails'), deckDetailPitch = document.getElementById('deckDetailPitch'), deckDetailBonding = document.getElementById('deckDetailBonding'), deckDetailMaxUplift = document.getElementById('deckDetailMaxUplift');
+            const currentCpeCpiDisplay = document.getElementById('currentCpeCpiDisplay'), displayCpeVals = document.getElementById('displayCpeVals'), displayCpiVals = document.getElementById('displayCpiVals');
+            const saveRoofButton = document.getElementById('saveRoofButton');
+            const liveCalculationResultsDisplay = document.getElementById('liveCalculationResultsDisplay'), liveResultsContent = document.getElementById('liveResultsContent');
+            const savedRoofsSection = document.getElementById('savedRoofsSection'), savedRoofsProjectName = document.getElementById('savedRoofsProjectName'), savedRoofsSFRef = document.getElementById('savedRoofsSFRef'), savedRoofsProjectPostcode = document.getElementById('savedRoofsProjectPostcode'), savedRoofsList = document.getElementById('savedRoofsList');
+            const apiResultsDisplay = document.getElementById('apiResultsDisplay');
+            const apiResultFields = { resApiStatus: document.getElementById('resApiStatus'), resSiteAltitude: document.getElementById('resSiteAltitude'), resDistanceToSea: document.getElementById('resDistanceToSea'), resDistanceInsideTown: document.getElementById('resDistanceInsideTown'), resBuildingHeightApi: document.getElementById('resBuildingHeightApi'), resEffectiveCalcHeight: document.getElementById('resEffectiveCalcHeight'), resBasicWindSpeed: document.getElementById('resBasicWindSpeed'), resAltitudeFactor: document.getElementById('resAltitudeFactor'), resDirectionalFactor: document.getElementById('resDirectionalFactor'), resSeasonalFactor: document.getElementById('resSeasonalFactor'), resProbabilityFactor: document.getElementById('resProbabilityFactor'), resOrographyFactor: document.getElementById('resOrographyFactor'), resExposureFactor: document.getElementById('resExposureFactor'), resExposureCorrectionFactor: document.getElementById('resExposureCorrectionFactor'), resPeakVelocityPressure: document.getElementById('resPeakVelocityPressure')};
+
+            // --- State Variables ---
+            let projectData = null, windUpliftSettings = null, defaultWindAppSettings = null;
+            let siteDataFetched = false, fetchedQP = null, lastFetchedPostcode = '', lastFetchedHeight = '';
+            const savedRoofsData = [];
+            let activeCpeCoefficients = {}, activeCpiCoefficients = {};
+            let isProgrammaticChange = false; 
+
+            // --- Initialization ---
+            if (currentYearSpan) currentYearSpan.textContent = new Date().getFullYear();
+            loadProjectData(); 
+            loadWindUpliftSettingsAndDefaults(); 
+            initializeRoofDataFormDefaults(); 
+            setupEventListeners(); 
+            updateCpeBasedOnParapet(); 
+            updateCpiBasedOnSubstrate(); 
+            updateCurrentCpeCpiDisplay();
+            calculateAndDisplayLiveResults();
+
+            // --- Data Loading Functions ---
+            function loadProjectData() { /* ... Same ... */ 
+                const dataString = sessionStorage.getItem('currentProjectData');
+                if (dataString) {
+                    projectData = JSON.parse(dataString);
+                    displaySFRef.textContent = projectData.projectSFRef || 'N/A'; 
+                    displayProjectName.textContent = projectData.projectName || 'N/A';
+                    const initialPostcode = projectData.projectAddress?.postcode || '';
+                    displayProjectPostcode.textContent = initialPostcode || 'N/A'; 
+                    calcPostcode.value = initialPostcode; 
+                    savedRoofsProjectName.textContent = projectData.projectName || 'N/A'; 
+                    savedRoofsSFRef.textContent = projectData.projectSFRef || 'N/A'; 
+                    savedRoofsProjectPostcode.textContent = initialPostcode || 'N/A';
+                } else { 
+                    displaySFRef.textContent = 'Not Set'; 
+                    displayProjectName.textContent = 'Not Set'; 
+                    displayProjectPostcode.textContent = 'N/A';
+                    savedRoofsProjectName.textContent = 'N/A'; 
+                    savedRoofsSFRef.textContent = 'N/A'; 
+                    savedRoofsProjectPostcode.textContent = 'N/A';
+                    fetchStatusMessage.innerHTML = `<p class="info-message message-area-small">No global project data. Enter Postcode & Height to fetch data.</p>`;
+                }
+            }
+            function loadWindUpliftSettingsAndDefaults() { 
+                 defaultWindAppSettings = { /* PASTE FULL defaultWindAppSettings from t_settings.html here */ 
+                    cpeByParapetRatio: { no_parapet: { name: "No Parapet (ratio < 0.05)", F: -2.0, G: -1.4, H: -0.7, I: -0.2 }, parapet_005: { name: "Parapet ~0.05 (0.05 ≤ ratio < 0.10)", F: -1.90, G: -1.30, H: -0.70, I: -0.20 }, parapet_010: { name: "Parapet ~0.10 (0.10 ≤ ratio < 0.20)", F: -1.85, G: -1.30, H: -0.70, I: -0.20 }, parapet_020: { name: "Parapet ~0.20 (ratio ≥ 0.20)", F: -1.40, G: -1.00, H: -0.70, I: -0.20 }},
+                    internalPressureCoefficients: { default_cpi:    { name: "Default", zones: { F: 0.2, G: 0.2, H: 0.2, I: 0.2 }}, air_tight_cpi:  { name: "Air Tight Deck (Permeability: No)", zones: { F: 0.0, G: 0.0, H: 0.0, I: 0.0 }}, dominant_opening_cpi: { name: "Dominant Opening (Opening: Yes)", zones: { F: 0.7, G: 0.7, H: 0.7, I: 0.7 }}},
+                    structuralDeckData: [ { id: "timber", name: "Timber", pitch: 120, bondingArea: 100, isManual: false }, { id: "concrete", name: "Concrete", pitch: 120, bondingArea: 100, isManual: false }, { id: "d32s", name: "D32S", pitch: 200, bondingArea: 51, isManual: false }, { id: "d35", name: "D35", pitch: 150, bondingArea: 50, isManual: false }, { id: "d46", name: "D46", pitch: 225, bondingArea: 37, isManual: false }, { id: "d60", name: "D60", pitch: 200, bondingArea: 36, isManual: false }, { id: "d100", name: "D100", pitch: 233.3, bondingArea: 33, isManual: false }, { id: "d137_135", name: "D137/135", pitch: 310, bondingArea: 35, isManual: false }, { id: "d159", name: "D159", pitch: 250, bondingArea: 33, isManual: false }, { id: "d153", name: "D153", pitch: 280, bondingArea: 35, isManual: false }, { id: "d200", name: "D200", pitch: 375, bondingArea: 39, isManual: false }, { id: "firth_sr30_plus", name: "Firth SR30+", pitch: 200, bondingArea: 60, isManual: false }, { id: "firth_sr35_plus", name: "Firth SR35+", pitch: 150, bondingArea: 46, isManual: false }, { id: "firth_sr60_plus", name: "Firth SR60+", pitch: 213, bondingArea: 46, isManual: false }, { id: "firth_sr100_plus", name: "Firth SR100+", pitch: 240, bondingArea: 42, isManual: false }, { id: "ji_265_1060", name: "JI 265-1060", pitch: 265, bondingArea: 73, isManual: false }, { id: "ji_252_1010", name: "JI 252-1010", pitch: 252.5, bondingArea: 71, isManual: false }, { id: "ji_225_900", name: "JI 225-900", pitch: 225, bondingArea: 68, isManual: false }, { id: "ji_195_780", name: "JI 73-195-780", pitch: 195, bondingArea: 64, isManual: false }, { id: "ji_280_1120", name: "JI 280-1120", pitch: 280, bondingArea: 42, isManual: false }, { id: "ji_275_825", name: "JI 100-275-825", pitch: 275, bondingArea: 50, isManual: false }, { id: "ji_250_750", name: "JI 250-750", pitch: 250, bondingArea: 56, isManual: false }, { id: "ji_320_960", name: "JI 320-960", pitch: 320, bondingArea: 54, isManual: false }, { id: "ji_310_930", name: "JI 310-930", pitch: 310, bondingArea: 46, isManual: false }, { id: "ji_280_840", name: "JI 280-840", pitch: 280, bondingArea: 42, isManual: false }, { id: "ji_250_750_alt", name: "JI 250-750 (alt)", pitch: 250, bondingArea: 47, isManual: false }, { id: "ji_375_750", name: "JI 200-375-750", pitch: 375, bondingArea: 54, isManual: false }, { id: "manual_input", name: "Manual Input", pitch: null, bondingArea: null, isManual: true }],
+                    bondingAreaUpliftData: [ { contactAreaPercent: 100, maxUpliftKN: 2.96 }, { contactAreaPercent: 99, maxUpliftKN: 2.96 }, { contactAreaPercent: 98, maxUpliftKN: 2.96 }, { contactAreaPercent: 97, maxUpliftKN: 2.96 }, { contactAreaPercent: 96, maxUpliftKN: 2.95 }, { contactAreaPercent: 95, maxUpliftKN: 2.95 }, { contactAreaPercent: 94, maxUpliftKN: 2.94 }, { contactAreaPercent: 93, maxUpliftKN: 2.93 }, { contactAreaPercent: 92, maxUpliftKN: 2.91 }, { contactAreaPercent: 91, maxUpliftKN: 2.90 }, { contactAreaPercent: 90, maxUpliftKN: 2.88 }, { contactAreaPercent: 89, maxUpliftKN: 2.86 }, { contactAreaPercent: 88, maxUpliftKN: 2.85 }, { contactAreaPercent: 87, maxUpliftKN: 2.83 }, { contactAreaPercent: 86, maxUpliftKN: 2.82 }, { contactAreaPercent: 85, maxUpliftKN: 2.80 }, { contactAreaPercent: 84, maxUpliftKN: 2.79 }, { contactAreaPercent: 83, maxUpliftKN: 2.77 }, { contactAreaPercent: 82, maxUpliftKN: 2.76 }, { contactAreaPercent: 81, maxUpliftKN: 2.74 }, { contactAreaPercent: 80, maxUpliftKN: 2.73 }, { contactAreaPercent: 79, maxUpliftKN: 2.73 }, { contactAreaPercent: 78, maxUpliftKN: 2.73 }, { contactAreaPercent: 77, maxUpliftKN: 2.72 }, { contactAreaPercent: 76, maxUpliftKN: 2.71 }, { contactAreaPercent: 75, maxUpliftKN: 2.70 }, { contactAreaPercent: 74, maxUpliftKN: 2.69 }, { contactAreaPercent: 73, maxUpliftKN: 2.68 }, { contactAreaPercent: 72, maxUpliftKN: 2.66 }, { contactAreaPercent: 71, maxUpliftKN: 2.65 }, { contactAreaPercent: 70, maxUpliftKN: 2.63 }, { contactAreaPercent: 69, maxUpliftKN: 2.62 }, { contactAreaPercent: 68, maxUpliftKN: 2.61 }, { contactAreaPercent: 67, maxUpliftKN: 2.60 }, { contactAreaPercent: 66, maxUpliftKN: 2.59 }, { contactAreaPercent: 65, maxUpliftKN: 2.57 }, { contactAreaPercent: 64, maxUpliftKN: 2.56 }, { contactAreaPercent: 63, maxUpliftKN: 2.54 }, { contactAreaPercent: 62, maxUpliftKN: 2.53 }, { contactAreaPercent: 61, maxUpliftKN: 2.51 }, { contactAreaPercent: 60, maxUpliftKN: 2.50 }, { contactAreaPercent: 59, maxUpliftKN: 2.49 }, { contactAreaPercent: 58, maxUpliftKN: 2.48 }, { contactAreaPercent: 57, maxUpliftKN: 2.46 }, { contactAreaPercent: 56, maxUpliftKN: 2.45 }, { contactAreaPercent: 55, maxUpliftKN: 2.43 }, { contactAreaPercent: 54, maxUpliftKN: 2.42 }, { contactAreaPercent: 53, maxUpliftKN: 2.40 }, { contactAreaPercent: 52, maxUpliftKN: 2.43 }, { contactAreaPercent: 51, maxUpliftKN: 2.41 }, { contactAreaPercent: 50, maxUpliftKN: 2.40 }, { contactAreaPercent: 49, maxUpliftKN: 2.36 }, { contactAreaPercent: 48, maxUpliftKN: 2.30 }, { contactAreaPercent: 47, maxUpliftKN: 2.25 }, { contactAreaPercent: 46, maxUpliftKN: 2.20 }, { contactAreaPercent: 45, maxUpliftKN: 2.15 }, { contactAreaPercent: 44, maxUpliftKN: 2.10 }, { contactAreaPercent: 43, maxUpliftKN: 2.05 }, { contactAreaPercent: 42, maxUpliftKN: 2.01 }, { contactAreaPercent: 41, maxUpliftKN: 1.96 }, { contactAreaPercent: 40, maxUpliftKN: 1.91 }, { contactAreaPercent: 39, maxUpliftKN: 1.91 }, { contactAreaPercent: 38, maxUpliftKN: 1.91 }, { contactAreaPercent: 37, maxUpliftKN: 1.81 }, { contactAreaPercent: 36, maxUpliftKN: 1.76 }, { contactAreaPercent: 35, maxUpliftKN: 1.71 }, { contactAreaPercent: 34, maxUpliftKN: 1.66 }, { contactAreaPercent: 33, maxUpliftKN: 1.62 }, { contactAreaPercent: 32, maxUpliftKN: 1.57 }, { contactAreaPercent: 31, maxUpliftKN: 1.52 }, { contactAreaPercent: 30, maxUpliftKN: 1.47 }, { contactAreaPercent: 29, maxUpliftKN: 1.42 }, { contactAreaPercent: 28, maxUpliftKN: 1.37 }, { contactAreaPercent: 27, maxUpliftKN: 1.32 }, { contactAreaPercent: 26, maxUpliftKN: 1.27 }, { contactAreaPercent: 25, maxUpliftKN: 1.22 }, { contactAreaPercent: 24, maxUpliftKN: 1.18 }, { contactAreaPercent: 23, maxUpliftKN: 1.13 }, { contactAreaPercent: 22, maxUpliftKN: 1.08 }, { contactAreaPercent: 21, maxUpliftKN: 1.03 }, { contactAreaPercent: 20, maxUpliftKN: 0.98 }, { contactAreaPercent: 19, maxUpliftKN: 0.93 }, { contactAreaPercent: 18, maxUpliftKN: 0.88 }, { contactAreaPercent: 17, maxUpliftKN: 0.83 }, { contactAreaPercent: 16, maxUpliftKN: 0.78 }, { contactAreaPercent: 15, maxUpliftKN: 0.73 }, { contactAreaPercent: 14, maxUpliftKN: 0.69 }, { contactAreaPercent: 13, maxUpliftKN: 0.64 }, { contactAreaPercent: 12, maxUpliftKN: 0.59 }, { contactAreaPercent: 11, maxUpliftKN: 0.54 }, { contactAreaPercent: 10, maxUpliftKN: 0.49 }, { contactAreaPercent: 9, maxUpliftKN: 0.44 }, { contactAreaPercent: 8, maxUpliftKN: 0.39 }, { contactAreaPercent: 7, maxUpliftKN: 0.34 }, { contactAreaPercent: 6, maxUpliftKN: 0.29 }, { contactAreaPercent: 5, maxUpliftKN: 0.24 }, { contactAreaPercent: 4, maxUpliftKN: 0.19 }, { contactAreaPercent: 3, maxUpliftKN: 0.15 }, { contactAreaPercent: 2, maxUpliftKN: 0.10 }, { contactAreaPercent: 1, maxUpliftKN: 0.05 }, { contactAreaPercent: 0, maxUpliftKN: 0.00 } ]
+                };
+                const settingsString = sessionStorage.getItem('windUpliftCalculatorSettings');
+                if (settingsString) { const storedSettings = JSON.parse(settingsString); windUpliftSettings = { ...JSON.parse(JSON.stringify(defaultWindAppSettings)), ...storedSettings, cpeByParapetRatio: storedSettings.cpeByParapetRatio || defaultWindAppSettings.cpeByParapetRatio, internalPressureCoefficients: storedSettings.internalPressureCoefficients || defaultWindAppSettings.internalPressureCoefficients, structuralDeckData: storedSettings.structuralDeckData && storedSettings.structuralDeckData.length > 0 ? storedSettings.structuralDeckData : defaultWindAppSettings.structuralDeckData, bondingAreaUpliftData: storedSettings.bondingAreaUpliftData && storedSettings.bondingAreaUpliftData.length > 0 ? storedSettings.bondingAreaUpliftData : defaultWindAppSettings.bondingAreaUpliftData };
+                } else { windUpliftSettings = JSON.parse(JSON.stringify(defaultWindAppSettings)); }
+                populateDeckDropdown();
+            }
+            function initializeRoofDataFormDefaults() { 
+                calcRoofName.value = "";
+                calcHeight.value = ""; 
+                calcParapet.value = "0.00"; 
+                calcFoS.value = "1.35"; // FoS default set to 1.35
+                calcRoofType.value = "flat_5deg"; 
+                calcAirPerm.value = "true"; // Air Perm default set to Yes
+                calcDominantOpening.value = "false"; 
+                calcShorterDim.value = ""; 
+                calcLongerDim.value = "";
+                calcDeckType.value = ""; 
+            }
+            function populateDeckDropdown() { /* ... Same ... */ 
+                if (!windUpliftSettings || !windUpliftSettings.structuralDeckData) { console.error("Deck settings not loaded."); return; }
+                calcDeckType.innerHTML = '<option value="">Select Deck...</option>';
+                windUpliftSettings.structuralDeckData.forEach(deck => { if (deck.id === "manual_input") return; const option = document.createElement('option'); option.value = deck.id; option.textContent = deck.name; calcDeckType.appendChild(option); });
+            }
+            function getSelectedDeckMaxUplift() { /* ... Same ... */ 
+                const selectedDeckId = calcDeckType.value; if (!selectedDeckId || !windUpliftSettings || !windUpliftSettings.structuralDeckData) return null;
+                const selectedDeck = windUpliftSettings.structuralDeckData.find(d => d.id === selectedDeckId);
+                if (selectedDeck && !selectedDeck.isManual && windUpliftSettings.bondingAreaUpliftData && selectedDeck.bondingArea !== null) { const roundedBondingArea = Math.round(selectedDeck.bondingArea); const bondingData = windUpliftSettings.bondingAreaUpliftData.find(item => item.contactAreaPercent === roundedBondingArea); if (bondingData) return parseFloat(bondingData.maxUpliftKN); const sortedBondingData = [...windUpliftSettings.bondingAreaUpliftData].sort((a,b) => b.contactAreaPercent - a.contactAreaPercent); const closestLower = sortedBondingData.find(item => item.contactAreaPercent <= roundedBondingArea); if(closestLower) return parseFloat(closestLower.maxUpliftKN);}
+                return null;
+            }
+            function updateDeckDetails() { /* ... Same ... */ 
+                const selectedDeckId = calcDeckType.value; if (!selectedDeckId || !windUpliftSettings || !windUpliftSettings.structuralDeckData) { selectedDeckDetails.style.display = 'none'; return; }
+                const selectedDeck = windUpliftSettings.structuralDeckData.find(d => d.id === selectedDeckId);
+                if (selectedDeck && !selectedDeck.isManual) { deckDetailPitch.textContent = selectedDeck.pitch !== null ? selectedDeck.pitch.toFixed(1) : '-'; deckDetailBonding.textContent = selectedDeck.bondingArea !== null ? selectedDeck.bondingArea.toFixed(0) : '-'; const maxUplift = getSelectedDeckMaxUplift(); deckDetailMaxUplift.textContent = maxUplift !== null ? maxUplift.toFixed(2) : 'N/A'; selectedDeckDetails.style.display = 'block';
+                } else { selectedDeckDetails.style.display = 'none'; }
+            }
+            
+            // --- Coefficient Update Functions ---
+            function updateCpeBasedOnParapet() { /* ... Same ... */ 
+                const bhValue = parseFloat(calcHeight.value); const phValue = parseFloat(calcParapet.value); let selectedCpeKey = 'no_parapet';
+                if (!isNaN(bhValue) && bhValue > 0 && !isNaN(phValue) && phValue >= 0) { const ratio = phValue / bhValue; if (ratio < 0.05) selectedCpeKey = 'no_parapet'; else if (ratio < 0.10) selectedCpeKey = 'parapet_005'; else if (ratio < 0.20) selectedCpeKey = 'parapet_010'; else selectedCpeKey = 'parapet_020';}
+                activeCpeCoefficients = windUpliftSettings ? { ...(windUpliftSettings.cpeByParapetRatio[selectedCpeKey] || defaultWindAppSettings.cpeByParapetRatio.no_parapet) } : { ...defaultWindAppSettings.cpeByParapetRatio.no_parapet };
+                updateCurrentCpeCpiDisplay(); calculateAndDisplayLiveResults();
+            }
+            function updateCpiBasedOnSubstrate() { 
+                if (isProgrammaticChange) return; 
+                const airPerm = calcAirPerm.value; 
+                const domOpening = calcDominantOpening.value; 
+                let cpiSourceKey = 'default_cpi';
+
+                // This logic is now primarily driven by airPerm. Deck type logic will set airPerm.
+                if (airPerm === "false") { 
+                    cpiSourceKey = 'air_tight_cpi';
+                    // If AirPerm is No, Dominant Opening is forced to No and disabled
+                    // This assignment should happen regardless of whether it was already "false" to ensure state consistency
+                    calcDominantOpening.value = "false"; 
+                    calcDominantOpening.disabled = true;
+                } else { // AirPerm is Yes
+                    calcDominantOpening.disabled = false; 
+                    if (domOpening === "true") { 
+                        cpiSourceKey = 'dominant_opening_cpi'; 
+                    } 
+                }
+                activeCpiCoefficients = windUpliftSettings ? 
+                    { ...(windUpliftSettings.internalPressureCoefficients[cpiSourceKey]?.zones || defaultWindAppSettings.internalPressureCoefficients.default_cpi.zones) } :
+                    { ...defaultWindAppSettings.internalPressureCoefficients.default_cpi.zones };
+                updateCurrentCpeCpiDisplay(); 
+                calculateAndDisplayLiveResults();
+            }
+            function updateCurrentCpeCpiDisplay() { /* ... Same ... */ 
+                if (!activeCpeCoefficients || !activeCpiCoefficients || Object.keys(activeCpeCoefficients).length < 4 || Object.keys(activeCpiCoefficients).length < 4 ) { currentCpeCpiDisplay.style.display = 'none'; return; }
+                const cpeDisplay = ZONES.map(z => (typeof activeCpeCoefficients[z] === 'number' ? activeCpeCoefficients[z].toFixed(2) : '-')).join(' / ');
+                const cpiDisplay = ZONES.map(z => (typeof activeCpiCoefficients[z] === 'number' ? activeCpiCoefficients[z].toFixed(2) : '-')).join(' / ');
+                displayCpeVals.textContent = cpeDisplay; displayCpiVals.textContent = cpiDisplay; currentCpeCpiDisplay.style.display = 'block';
+            }
+
+            // --- Setup Event Listeners ---
+            function setupEventListeners() {
+                const allInputFields = [calcHeight, calcParapet, calcShorterDim, calcLongerDim, calcFoS, calcRoofType, calcAirPerm, calcDominantOpening, calcDeckType, calcRoofName, calcPostcode];
+                allInputFields.forEach(el => {
+                    el.addEventListener('input', () => { // Use 'input' for text/number, 'change' for select if preferred
+                        if (isProgrammaticChange) return; // Skip if change was made by another script part
+
+                        // Update coefficients based on specific input changes
+                        if (el === calcHeight || el === calcParapet) updateCpeBasedOnParapet();
+                        // For calcAirPerm and calcDominantOpening, their own specific listeners will handle Cpi update
+                        
+                        if (el === calcDeckType) { // Special handling for deck type
+                            const selectedDeckId = calcDeckType.value;
+                            updateDeckDetails(); 
+                            
+                            isProgrammaticChange = true; // Set flag before changing other fields
+                            if (selectedDeckId === 'concrete') {
+                                calcAirPerm.value = "false";
+                                calcDominantOpening.value = "false";
+                                calcAirPerm.disabled = true;
+                                calcDominantOpening.disabled = true;
+                            } else {
+                                calcAirPerm.value = "true"; // Default to Yes for non-concrete
+                                // calcDominantOpening.value = "false"; // Default to No for Dominant Opening
+                                calcAirPerm.disabled = false;
+                                calcDominantOpening.disabled = false; // Will be re-evaluated by updateCpiBasedOnSubstrate
+                            }
+                            isProgrammaticChange = false;
+                            updateCpiBasedOnSubstrate(); // This will also call calculateAndDisplayLiveResults
+                        } else {
+                             calculateAndDisplayLiveResults(); // For other fields that don't directly change Cpe/Cpi
+                        }
+                    });
+                });
+                
+                // Specific 'change' listeners for selects that might not fire 'input' consistently or need specific handling
+                calcAirPerm.addEventListener('change', () => { if (!isProgrammaticChange) updateCpiBasedOnSubstrate(); });
+                calcDominantOpening.addEventListener('change', () => { if (!isProgrammaticChange) updateCpiBasedOnSubstrate(); });
+                calcFoS.addEventListener('change', calculateAndDisplayLiveResults); // FoS change needs live update
+                calcDeckType.addEventListener('change', () => { /* Already handled in the loop by 'input', but 'change' is better for select elements. The logic in the loop should be in a separate function called by both 'input' (for text fields) and 'change' (for selects) to avoid duplication or be refined */ });
+
+
+                [calcPostcode, calcHeight].forEach(el => { el.addEventListener('input', () => { const currentPostcode = calcPostcode.value.trim().toUpperCase(); const currentHeightStr = calcHeight.value.trim(); if (siteDataFetched && (currentPostcode !== lastFetchedPostcode.toUpperCase() || currentHeightStr !== lastFetchedHeight )) { dataChangeWarning.style.display = 'block'; siteDataFetched = false; fetchedQP = null; apiResultsDisplay.style.display = 'none'; calculateAndDisplayLiveResults(); } else if (!siteDataFetched) { dataChangeWarning.style.display = 'none'; } else { dataChangeWarning.style.display = 'none'; }}); });
+                fetchSiteDataButton.addEventListener('click', handleFetchSiteData);
+                saveRoofButton.addEventListener('click', handleSaveRoof);
+            }
+            
+            // --- API Fetch ---
+            async function handleFetchSiteData() { /* ... (Same with refined postcode/height validation) ... */ 
+                const postcodeVal = calcPostcode.value.trim(); const heightValStr = calcHeight.value.trim();
+                const heightVal = parseFloat(heightValStr);
+                let apiFetchValid = true;
+                calcPostcode.classList.remove('error-field'); calcHeight.classList.remove('error-field'); fetchStatusMessage.innerHTML = '';
+                if (!postcodeVal) { calcPostcode.classList.add('error-field'); apiFetchValid = false; }
+                if (!heightValStr || isNaN(heightVal) || heightVal <= 0) { calcHeight.classList.add('error-field'); apiFetchValid = false; }
+                if (!apiFetchValid) { fetchStatusMessage.innerHTML = `<p class="error-message message-area-small">Valid Postcode & Building Height required.</p>`; setTimeout(() => fetchStatusMessage.innerHTML = '', 4000); return; }
+                
+                fetchStatusMessage.innerHTML = ''; apiLoadingSpinner.style.display = 'inline-block'; fetchSiteDataButton.classList.add('disabled-btn'); fetchSiteDataButton.disabled = true;
+                apiResultsDisplay.style.display = 'none'; Object.values(apiResultFields).forEach(el => el.textContent = '-');
+                const apiKey = "02CCE87B-72B4-4EFD-99EA-1C4DE674DAF8"; const apiRequestUrl = `https://velventi.cadsglobal.com/api/v1.1/fetch/BasicReport?apiKey=${apiKey}&rf=xml&bh=${heightVal}&pc=${encodeURIComponent(postcodeVal)}`;
+                try {
+                    const response = await fetch(apiRequestUrl); const xmlText = await response.text(); const parser = new DOMParser(); const xmlDoc = parser.parseFromString(xmlText, "application/xml");
+                    const getText = (query, defaultValue = "-") => { const node = xmlDoc.querySelector(query); if (query === "ServiceStatus Error") { return node && node.textContent && node.textContent.trim() !== "" ? node.textContent.trim() : "OK"; } return node && node.textContent && node.textContent.trim() !== "" ? node.textContent.trim() : defaultValue; };
+                    const formatNumberForAPI = (valueStr, decimalPlaces, defVal = "-") => { const p = parseFloat(valueStr); return !isNaN(p) ? p.toFixed(decimalPlaces) : defVal; };
+                    const apiStatus = getText("ServiceStatus Error"); apiResultFields.resApiStatus.textContent = apiStatus;
+                    if (apiStatus !== "OK" && !xmlDoc.querySelector("SiteInformation")) { fetchStatusMessage.innerHTML = `<p class="error-message message-area-small">API Error: ${apiStatus}</p>`; apiResultsDisplay.style.display = 'block'; siteDataFetched = false; fetchedQP = null;
+                    } else {
+                        Object.keys(apiResultFields).forEach(key => { let queryPath = key.replace('res', ''); if (key === "resSiteAltitude" || key === "resBasicWindSpeed" || key === "resSeasonalFactor" || key === "resProbabilityFactor") queryPath = "SiteInformation " + queryPath + " Value"; else if (key !== "resApiStatus") queryPath = queryPath + " Value"; let val = getText(queryPath); let decimals = (key === "resSiteAltitude") ? 0 : 3; apiResultFields[key].textContent = formatNumberForAPI(val, decimals);});
+                        fetchedQP = parseFloat(apiResultFields.resPeakVelocityPressure.textContent); 
+                        const buildingHeightApiValText = apiResultFields.resBuildingHeightApi.textContent; const exposureCorrectionFactorValText = apiResultFields.resExposureCorrectionFactor.textContent;
+                        if (parseFloat(exposureCorrectionFactorValText) === 1.0) { apiResultFields.resEffectiveCalcHeight.textContent = buildingHeightApiValText; } else { apiResultFields.resEffectiveCalcHeight.textContent = formatNumberForAPI(getText("EffectiveHeight Value"), 3); }
+                        siteDataFetched = true; lastFetchedPostcode = postcodeVal; lastFetchedHeight = heightValStr;
+                        dataChangeWarning.style.display = 'none'; apiResultsDisplay.style.display = 'block';
+                        fetchStatusMessage.innerHTML = `<p class="success-message message-area-small">Site data fetched successfully!</p>`;
+                        calculateAndDisplayLiveResults(); 
+                    }
+                } catch (error) { console.error('API Fetch Error:', error); fetchStatusMessage.innerHTML = `<p class="error-message message-area-small">Fetch Error. Check console.</p>`; apiResultFields.resApiStatus.textContent = `Fetch Error`; apiResultsDisplay.style.display = 'block'; siteDataFetched = false; fetchedQP = null;
+                } finally { apiLoadingSpinner.style.display = 'none'; fetchSiteDataButton.classList.remove('disabled-btn'); fetchSiteDataButton.disabled = false; setTimeout(() => fetchStatusMessage.innerHTML = '', 4000); }
+            }
+
+            // --- Core Calculation Function ---
+            function performRoofCalculations(currentQP, currentCPEs, currentCPIs, deckMaxUplift, fosDropdownValue) {
+                const results = { netDesignPressure: {}, fullyBondedCheck: {}, ballastWeight: {} };
+                const generalFoS = parseFloat(fosDropdownValue); // FoS from dropdown for general calcs
+
+                if (isNaN(currentQP) || isNaN(generalFoS) || !currentCPEs || !currentCPIs || Object.keys(currentCPEs).length < 4 || Object.keys(currentCPIs).length < 4) {
+                    ZONES.forEach(zone => { 
+                        results.netDesignPressure[zone] = 'Error'; 
+                        results.fullyBondedCheck[zone] = { value: 'N/A', statusText: 'Error', pass: null };
+                        results.ballastWeight[zone] = 'Error'; 
+                    }); 
+                    return results; 
+                }
+
+                ZONES.forEach(zone => {
+                    const cpe = currentCPEs[zone]; 
+                    const cpi = currentCPIs[zone];
+                    if (typeof cpe !== 'number' || typeof cpi !== 'number') {
+                        results.netDesignPressure[zone] = 'N/A (Coef)'; 
+                        results.fullyBondedCheck[zone] = { value: deckMaxUplift !== null && !isNaN(deckMaxUplift) ? deckMaxUplift.toFixed(2) : 'N/A', statusText: 'N/A (Coef)', pass: null };
+                        results.ballastWeight[zone] = 'N/A (Coef)'; 
+                        return; 
+                    }
+
+                    const pressureBase = (cpe - cpi) * currentQP;
+                    // Net Design Pressure for general use (e.g., bonded check)
+                    const netPGeneral = pressureBase * generalFoS;
+                    results.netDesignPressure[zone] = parseFloat(netPGeneral.toFixed(2));
+
+                    // Fully Bonded Check (uses general Net Design Pressure)
+                    if (deckMaxUplift !== null && !isNaN(deckMaxUplift)) { 
+                        const pass = Math.abs(netPGeneral) <= deckMaxUplift; 
+                        results.fullyBondedCheck[zone] = { value: deckMaxUplift.toFixed(2), statusText: pass ? 'PASS' : 'FAIL', pass: pass };
+                    } else { 
+                        results.fullyBondedCheck[zone] = { value: 'N/A', statusText: 'N/A (Deck Limit)', pass: null }; 
+                    }
+                    
+                    // Ballast Weight (uses P_base and fixed FoS_BALLAST)
+                    const pressureForBallast = pressureBase * FOS_BALLAST; // Use fixed 1.5 FoS for ballast
+                    let ballast = pressureForBallast * -100 / 3; 
+                    if (isNaN(ballast)) { results.ballastWeight[zone] = 'N/A'; } 
+                    else if (ballast < 0) { results.ballastWeight[zone] = 0; } 
+                    else if (ballast < 80) { results.ballastWeight[zone] = 80; } 
+                    else { results.ballastWeight[zone] = Math.round(ballast); } // Round to nearest whole number
+                }); 
+                return results;
+            }
+
+            // --- Live Calculation Display ---
+            function calculateAndDisplayLiveResults() {
+                liveCalculationResultsDisplay.style.display = 'block'; 
+                if (!siteDataFetched || fetchedQP === null || isNaN(fetchedQP)) {
+                    liveResultsContent.innerHTML = '<p class="text-center text-gray-500 py-4">Please fetch site data (using valid Postcode and Height) to see live calculations.</p>'; return;
+                }
+                if (!activeCpeCoefficients || Object.keys(activeCpeCoefficients).length < 4 || !activeCpiCoefficients || Object.keys(activeCpiCoefficients).length < 4 ) {
+                     liveResultsContent.innerHTML = '<p class="text-center text-gray-500 py-4">CPE/CPI coefficients not fully determined. Check Parapet, Air Permeability, and Dominant Opening inputs.</p>'; return;
+                }
+                const requiredForCalc = [calcRoofName, calcShorterDim, calcLongerDim, calcDeckType, calcFoS, calcAirPerm, calcDominantOpening]; 
+                let allCalcInputsValid = true;
+                requiredForCalc.forEach(field => { if (!field.value || (field.type !== 'select-one' && !field.value.trim())) { allCalcInputsValid = false; } });
+                if (calcDeckType.value === "") allCalcInputsValid = false;
+                if (!allCalcInputsValid) {
+                    liveResultsContent.innerHTML = '<p class="text-center text-gray-500 py-4">Please fill all required roof data fields (*) to see live calculations.</p>'; return;
+                }
+                const currentFoS = parseFloat(calcFoS.value);
+                const currentDeckMaxUplift = getSelectedDeckMaxUplift();
+                const liveResults = performRoofCalculations(fetchedQP, activeCpeCoefficients, activeCpiCoefficients, currentDeckMaxUplift, currentFoS);
+                renderResultsTablesToContainer(liveResultsContent, liveResults, activeCpeCoefficients, activeCpiCoefficients, currentFoS, currentDeckMaxUplift); 
+            }
+
+            // --- Helper to Render Result Tables ---
+            function renderResultsTablesToContainer(containerElement, resultsData, cpeData, cpiData, fosToDisplay, deckMaxUpliftForDisplay = null) { 
+                containerElement.innerHTML = ''; 
+                const { netDesignPressure, fullyBondedCheck, ballastWeight } = resultsData; 
+                const actualDeckMaxUplift = deckMaxUpliftForDisplay;
+
+                let generalTableHTML = `<h5 class="calc-subheader">General Values (Using FoS: ${fosToDisplay || 'N/A'})</h5><div class="overflow-x-auto"><table class="results-table w-full"><thead><tr><th class="row-title">Parameter</th><th>Zone F</th><th>Zone G</th><th>Zone H</th><th>Zone I</th></tr></thead><tbody><tr><td class="row-title">Cpe</td>${ZONES.map(z => `<td>${cpeData[z]?.toFixed(2) || '-'}</td>`).join('')}</tr><tr><td class="row-title">Cpi</td>${ZONES.map(z => `<td>${cpiData[z]?.toFixed(2) || '-'}</td>`).join('')}</tr><tr><td class="row-title">Net Design Pressure (kN/m²)</td>${ZONES.map(z => `<td>${netDesignPressure[z]?.toFixed(2) || netDesignPressure[z] || '-'}</td>`).join('')}</tr></tbody></table></div>`;
+                let bondedTableHTML = `<h5 class="calc-subheader">Fully Bonded System Check (Using FoS: ${fosToDisplay || 'N/A'})</h5><div class="overflow-x-auto"><table class="results-table w-full"><thead><tr><th class="row-title">Parameter</th><th>Zone F</th><th>Zone G</th><th>Zone H</th><th>Zone I</th></tr></thead><tbody><tr><td class="row-title">Max Allowable (kN/m²)</td>${ZONES.map(z => `<td>${actualDeckMaxUplift !== null && !isNaN(actualDeckMaxUplift) ? actualDeckMaxUplift.toFixed(2) : 'N/A'}</td>`).join('')}</tr><tr><td class="row-title">Net Design Pressure (kN/m²)</td>${ZONES.map(z => `<td>${netDesignPressure[z]?.toFixed(2) || netDesignPressure[z] || '-'}</td>`).join('')}</tr><tr><td class="row-title">Status</td>${ZONES.map(z => { const check = fullyBondedCheck[z] || {pass: null, statusText: '-'}; const passFailClass = check.pass === true ? 'result-pass' : (check.pass === false ? 'result-fail' : ''); return `<td class="${passFailClass}">${check.statusText || '-'}</td>`; }).join('')}</tr></tbody></table></div>`;
+                let ballastTableHTML = `<h5 class="calc-subheader">Permatec Ballasted System <span class="fos-note">(Calculated with fixed FoS: ${FOS_BALLAST.toFixed(2)})</span></h5><div class="overflow-x-auto"><table class="results-table w-full"><thead><tr><th class="row-title">Parameter</th><th>Zone F</th><th>Zone G</th><th>Zone H</th><th>Zone I</th></tr></thead><tbody><tr><td class="row-title">Ballast Weight (kg/m²)</td>${ZONES.map(z => `<td>${typeof ballastWeight[z] === 'number' ? ballastWeight[z].toFixed(0) : ballastWeight[z] || '-'}</td>`).join('')}</tr></tbody></table></div>`;
+                
+                containerElement.innerHTML = generalTableHTML + bondedTableHTML + ballastTableHTML;
+            }
+
+            // --- Save Roof Logic ---
+            function handleSaveRoof() { 
+                let isValid = true; const currentRoofInputs = {}; const formElements = roofDataForm.elements;
+                const requiredFieldsForSave = [calcRoofName, calcPostcode, calcHeight, calcShorterDim, calcLongerDim, calcFoS, calcRoofType, calcAirPerm, calcDominantOpening, calcDeckType];
+                requiredFieldsForSave.forEach(element => { element.classList.remove('error-field'); if (element.required && (!element.value || element.value.trim() === "")) { isValid = false; element.classList.add('error-field'); if (isValid) element.focus(); }}); // Check trim for text, just value for select
+                if (calcDeckType.value === "") { isValid = false; calcDeckType.classList.add('error-field'); if(isValid) calcDeckType.focus(); }
+                for (let i = 0; i < formElements.length; i++) { const element = formElements[i]; if (element.id) currentRoofInputs[element.id] = element.value; }
+
+                if (!isValid) { alert("Please fill in all required fields (marked with * and highlighted in red)."); return; }
+                if (!siteDataFetched || fetchedQP === null) { alert("Please fetch site data successfully before saving/calculating a roof."); return; }
+                if (!activeCpeCoefficients || Object.keys(activeCpeCoefficients).length < 4 || !activeCpiCoefficients || Object.keys(activeCpiCoefficients).length < 4 ) { alert("CPE/CPI coefficients not determined. Check Parapet, Air Permeability, and Dominant Opening inputs."); return; }
+                
+                const selectedDeck = windUpliftSettings.structuralDeckData.find(d => d.id === currentRoofInputs.calcDeckType);
+                const deckMaxUpliftForCalc = getSelectedDeckMaxUplift();
+                const fosForGeneralCalcs = parseFloat(currentRoofInputs.calcFoS); // This is the FoS from dropdown
+                const calculatedResults = performRoofCalculations(fetchedQP, activeCpeCoefficients, activeCpiCoefficients, deckMaxUpliftForCalc, fosForGeneralCalcs);
+                
+                const roofDataToSave = { 
+                    inputs: { ...currentRoofInputs }, 
+                    apiSnapshot: { peakVelocityPressure: fetchedQP, effectiveHeight: apiResultFields.resEffectiveCalcHeight.textContent, postcode: lastFetchedPostcode, height: lastFetchedHeight, qpFromDisplay: apiResultFields.resPeakVelocityPressure.textContent }, 
+                    coefficientsSnapshot: { cpe: { ...activeCpeCoefficients }, cpi: { ...activeCpiCoefficients } }, 
+                    deckDetailsSnapshot: { name: selectedDeck ? selectedDeck.name : 'N/A', pitch: selectedDeck ? selectedDeck.pitch : null, bondingArea: selectedDeck ? selectedDeck.bondingArea : null, maxAllowableUplift: deckMaxUpliftForCalc }, 
+                    results: calculatedResults,
+                    generalFoSUsed: fosForGeneralCalcs // Store the FoS used for general calcs explicitly
+                };
+                savedRoofsData.push(roofDataToSave); renderSavedRoofs(); savedRoofsSection.style.display = 'block';
+            }
+
+            function renderSavedRoofs() { 
+                savedRoofsList.innerHTML = '';
+                savedRoofsData.forEach((roofData, index) => {
+                    const { inputs, coefficientsSnapshot, deckDetailsSnapshot, results, apiSnapshot, generalFoSUsed } = roofData;
+                    const roofItemDiv = document.createElement('div'); roofItemDiv.className = 'saved-roof-item';
+                    const resultsContainer = document.createElement('div');
+                    // Pass the specific Cpe/Cpi and FoS that were used for THIS roof's calculation
+                    renderResultsTablesToContainer(resultsContainer, results, coefficientsSnapshot.cpe, coefficientsSnapshot.cpi, generalFoSUsed, deckDetailsSnapshot.maxAllowableUplift);
+                    roofItemDiv.innerHTML = `<h4 class="flex justify-between items-center">${inputs.calcRoofName ? inputs.calcRoofName : `Roof Configuration ${index + 1}`}<button class="text-xs text-red-500 hover:text-red-700 remove-roof-btn" data-index="${index}">&times; Remove</button></h4><p class="text-sm text-gray-500 mb-2">Site Postcode: ${apiSnapshot.postcode}, Building Height: ${apiSnapshot.height}m, qp: ${apiSnapshot.qpFromDisplay || 'N/A'} kPa</p><div class="saved-roof-details mb-3"><span>Parapet: ${inputs.calcParapet || '0'}m</span><span>Shorter Dim: ${inputs.calcShorterDim}m</span><span>Longer Dim: ${inputs.calcLongerDim}m</span><span>Deck: ${deckDetailsSnapshot.name || 'N/A'} (Bonding: ${deckDetailsSnapshot.bondingArea !== null ? deckDetailsSnapshot.bondingArea.toFixed(0) : '-'}%)</span><span>Air Perm: ${inputs.calcAirPerm === 'true' ? 'Yes' : 'No'}</span><span>Dominant Opening: ${inputs.calcDominantOpening === 'true' ? 'Yes' : 'No'}</span></div>`;
+                    roofItemDiv.appendChild(resultsContainer); savedRoofsList.appendChild(roofItemDiv);
+                });
+                document.querySelectorAll('.remove-roof-btn').forEach(button => { button.addEventListener('click', function() { const roofIndexToRemove = parseInt(this.dataset.index); savedRoofsData.splice(roofIndexToRemove, 1); renderSavedRoofs(); if(savedRoofsData.length === 0) savedRoofsSection.style.display = 'none'; }); });
+            }
+        });
+        // --- END Polytec Wind Uplift Calculator Logic ---
+    </script>
+</body>
+</html>

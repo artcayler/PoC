@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rain Load Calculator - Polytec Tools</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        .breadcrumb-link { color: #4f46e5; text-decoration: none; }
+        .breadcrumb-link:hover { text-decoration: underline; }
+        .back-to-tools-btn {
+            padding: 0.5rem 1rem; background-color: #64748b; color: white;
+            border-radius: 0.375rem; text-decoration: none; transition: background-color 0.3s ease;
+            font-weight: 500;
+        }
+        .back-to-tools-btn:hover { background-color: #475569; }
+        .page-section {
+            background-color: white; padding: 1.5rem; border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+            margin-bottom: 2rem;
+        }
+        .section-title {
+            font-size: 1.25rem; font-weight: 600; color: #1f2937;
+            margin-bottom: 1rem; border-bottom: 1px solid #e5e7eb; padding-bottom: 0.5rem;
+        }
+        .form-input, .form-select {
+            width: 100%; padding: 0.65rem 0.75rem; border: 1px solid #d1d5db;
+            border-radius: 0.375rem; box-shadow: inset 0 1px 2px 0 rgba(0,0,0,0.05);
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+        .form-input:focus, .form-select:focus {
+            border-color: #4f46e5; outline: none;
+            box-shadow: 0 0 0 0.2rem rgba(79, 70, 229, 0.25);
+        }
+        .form-input.error-field, .form-select.error-field { border-color: #ef4444; }
+        .form-label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151; }
+        .form-grid { display: grid; grid-template-columns: repeat(1, 1fr); gap: 1rem; }
+        @media (min-width: 768px) { .form-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (min-width: 1024px) { .form-grid { grid-template-columns: repeat(3, 1fr); } }
+        
+        .action-btn {
+            font-weight: 600; padding: 0.6rem 1.2rem; border-radius: 0.375rem;
+            transition: background-color 0.3s; border: 1px solid transparent; cursor: pointer;
+        }
+        .add-roof-btn { background-color: #10b981; color: white; margin-top:1rem; } /* emerald-500 */
+        .add-roof-btn:hover { background-color: #059669; }
+        .disabled-btn { opacity: 0.5; cursor: not-allowed !important; }
+
+        .project-info-bar { font-size: 0.9rem; color: #4b5563; }
+        .project-info-bar strong { color: #1e3a8a; }
+        .outlet-details-display, .live-calc-preview-item {
+            background-color: #eef2ff; padding: 0.75rem; border-radius: 0.25rem;
+            border-left: 3px solid #4f46e5; font-size: 0.875rem; color: #4338ca; margin-top: 0.5rem;
+        }
+        .added-roof-item { border: 1px solid #e5e7eb; padding: 1rem; border-radius: 0.375rem; margin-bottom:1.5rem; }
+        .added-roof-item h4 { font-size: 1.1rem; font-weight: 600; color: #374151; margin-bottom: 0.25rem;}
+        .added-roof-details { font-size: 0.875rem; color: #4b5563; display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.25rem 1rem; }
+        .calc-results-summary { font-size: 0.9rem; margin-top:0.75rem; padding-top:0.75rem; border-top: 1px dashed #cbd5e1;}
+        .calc-results-summary strong { color: #1e3a8a;}
+        .status-ok { color: #16a34a; font-weight: bold;}
+        .status-warning { color: #d97706; font-weight: bold;}
+        .status-error { color: #dc2626; font-weight: bold;}
+        .warning-message { background-color: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 0.5rem; border-radius: 0.25rem; font-size: 0.875rem; margin-top: 0.5rem;}
+        .error-text-small { font-size: 0.75rem; color: #ef4444; margin-top: 0.25rem; }
+        #liveCalculationPreview { display: none; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <header class="bg-gray-800 text-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <a href="index.html" class="text-xl font-bold hover:text-indigo-300">Polytec Hub</a>
+            <nav aria-label="Breadcrumb" class="hidden sm:inline-flex">
+                <ol class="list-none p-0 inline-flex text-sm">
+                    <li class="flex items-center"><a href="index.html" class="breadcrumb-link hover:text-indigo-200">Portal</a><svg class="fill-current w-3 h-3 mx-2 text-gray-500" viewBox="0 0 20 20"><path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"/></svg></li>
+                    <li class="flex items-center"><a href="tools.html" class="breadcrumb-link hover:text-indigo-200">Tools Section</a><svg class="fill-current w-3 h-3 mx-2 text-gray-500" viewBox="0 0 20 20"><path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"/></svg></li>
+                    <li class="flex items-center"><span class="text-gray-400">Rain Load Calculator</span></li>
+                </ol>
+            </nav>
+            <a href="tools.html" class="back-to-tools-btn text-sm">&larr; All Tools</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-6 flex-grow">
+        <div id="projectInfoDisplay" class="page-section project-info-bar flex flex-wrap justify-between items-center gap-2">
+            <span>SF Ref: <strong id="displaySFRef">-</strong></span>
+            <span>Project Name: <strong id="displayProjectName">-</strong></span>
+        </div>
+
+        <div id="drainageProjectDetailsSection" class="page-section">
+            <h2 class="section-title">Step 1: Drainage Project Details</h2>
+            <form id="mainDrainageProjectForm" class="form-grid">
+                <div>
+                    <label for="drainageClientName" class="form-label">Client Name</label>
+                    <input type="text" id="drainageClientName" class="form-input" maxlength="50">
+                </div>
+                <div>
+                    <label for="drainageProjectPostcode" class="form-label">Project Postcode (for this calculation)</label>
+                    <input type="text" id="drainageProjectPostcode" class="form-input" maxlength="10">
+                </div>
+                 <div>
+                    <label for="drainageRainfallRate" class="form-label">Rainfall Rate (l/s/m²) <span class="text-red-500">*</span></label>
+                    <input type="number" id="drainageRainfallRate" class="form-input" value="0.021" step="0.001" min="0.001" required>
+                    <small class="text-xs text-gray-500">Default 0.021 l/s/m² (75.6 mm/hr)</small>
+                </div>
+                <div>
+                    <label for="drainageSafetyFactor" class="form-label">Safety Factor <span class="text-red-500">*</span></label>
+                    <select id="drainageSafetyFactor" class="form-select" required>
+                        <option value="1.5" selected>1.5 (Cat 2)</option>
+                        <option value="4.5">4.5 (Cat 3)</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="drainageBuildingLife" class="form-label">Building Life (years) <span class="text-red-500">*</span></label>
+                    <input type="number" id="drainageBuildingLife" class="form-input" value="60" min="1" required>
+                </div>
+                <div>
+                    <label for="drainageRoofingSystem" class="form-label">Roofing System <span class="text-red-500">*</span></label>
+                    <select id="drainageRoofingSystem" class="form-select" required>
+                        <option value="Armourplan">Armourplan</option>
+                        <option value="Spectraplan">Spectraplan</option>
+                    </select>
+                </div>
+            </form>
+            <div id="buildingLifeWarning" class="warning-message mt-4" style="display:none;">Building life has been set to 1 year due to selected roof falls.</div>
+        </div>
+        
+        <div id="addRoofAreaSection" class="page-section">
+            <h2 class="section-title">Step 2: Add Roof Area Details</h2>
+            <form id="addRoofForm">
+                <div class="form-grid">
+                    <div>
+                        <label for="roofName" class="form-label">Roof Name/Identifier <span class="text-red-500">*</span></label>
+                        <input type="text" id="roofName" class="form-input" maxlength="50" required>
+                        <small id="roofNameError" class="error-text-small" style="display:none;"></small>
+                    </div>
+                    <div>
+                        <label for="roofFalls" class="form-label">Falls <span class="text-red-500">*</span></label>
+                        <select id="roofFalls" class="form-select" required>
+                            <option value="1:80+" selected>1:80+</option>
+                            <option value="<1:80">Less than 1:80</option>
+                            <option value="Green Roof">Green Roof</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="catchmentArea" class="form-label">Catchment Area (m²) <span class="text-red-500">*</span></label>
+                        <input type="number" id="catchmentArea" class="form-input" step="0.01" min="0.01" placeholder="0.00" required>
+                    </div>
+                     <div>
+                        <label for="sumpDepth" class="form-label">Sump Depth (mm) <span class="text-red-500">*</span></label>
+                        <input type="number" id="sumpDepth" class="form-input" step="1" value="0" min="0" required>
+                    </div>
+                    <div>
+                        <label for="outletType" class="form-label">Outlet Type <span class="text-red-500">*</span></label>
+                        <select id="outletType" class="form-select" required>
+                            <option value="">Select Outlet...</option>
+                            {/* Options populated by JS */}
+                        </select>
+                         <div id="selectedOutletInfoDisplay" class="outlet-details-display" style="display: none;"></div>
+                    </div>
+                    <div>
+                        <label for="proposedOutlets" class="form-label">Proposed Number of Outlets <span class="text-red-500">*</span></label>
+                        <input type="number" id="proposedOutlets" class="form-input" step="1" min="0" placeholder="0" required>
+                    </div>
+                </div>
+                <button type="button" id="addRoofButton" class="action-btn add-roof-btn w-full md:w-auto">Add Roof & Calculate</button>
+            </form>
+        </div>
+
+        <div id="liveCalculationPreview" class="page-section" style="display:none;">
+            <h3 class="section-title">Live Calculation Preview (for current roof inputs)</h3>
+            <div id="livePreviewContent" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="live-calc-preview-item"><strong>Total Runoff:</strong> <span id="liveTotalRunoff">-</span> l/s</div>
+                <div class="live-calc-preview-item"><strong>Selected Outlet Capacity:</strong> <span id="liveOutletCapacity">-</span> l/s</div>
+                <div class="live-calc-preview-item"><strong>Min. Outlets Required:</strong> <span id="liveMinOutlets">-</span></div>
+                <div class="live-calc-preview-item"><strong>Status:</strong> <span id="liveStatus" class="font-bold">-</span></div>
+            </div>
+        </div>
+
+        <div id="addedRoofsListSection" class="page-section" style="display:none;">
+            <h2 class="section-title">Step 3: Added Roof Areas & Calculation Results</h2>
+            <div class="project-info-bar mb-4">
+                Overall Project: <strong id="overallProjectName">-</strong> (SF Ref: <strong id="overallSFRef">-</strong>)
+            </div>
+            <div id="addedRoofsContainer">
+                <p class="text-gray-500 italic">No roof areas added yet.</p>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-gray-700 text-gray-300 text-center p-4 mt-auto">
+        <p>&copy; <span id="currentYear"></span> Cayler. All rights reserved.</p>
+    </footer>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- DOM Elements ---
+        const currentYearSpan = document.getElementById('currentYear');
+        const displaySFRef = document.getElementById('displaySFRef');
+        const displayProjectName = document.getElementById('displayProjectName');
+        // Drainage Project Details Form
+        const mainDrainageProjectForm = document.getElementById('mainDrainageProjectForm');
+        const drainageClientName = document.getElementById('drainageClientName');
+        const drainageProjectPostcode = document.getElementById('drainageProjectPostcode');
+        const drainageRainfallRate = document.getElementById('drainageRainfallRate');
+        const drainageSafetyFactor = document.getElementById('drainageSafetyFactor');
+        const drainageBuildingLife = document.getElementById('drainageBuildingLife');
+        const drainageRoofingSystem = document.getElementById('drainageRoofingSystem');
+        const buildingLifeWarningDiv = document.getElementById('buildingLifeWarning');
+        // Add Roof Area Form
+        const addRoofForm = document.getElementById('addRoofForm');
+        const roofNameInput = document.getElementById('roofName');
+        const roofNameError = document.getElementById('roofNameError');
+        const roofFallsSelect = document.getElementById('roofFalls');
+        const catchmentAreaInput = document.getElementById('catchmentArea');
+        const sumpDepthInput = document.getElementById('sumpDepth');
+        const outletTypeSelect = document.getElementById('outletType');
+        const selectedOutletInfoDisplayDiv = document.getElementById('selectedOutletInfoDisplay');
+        const proposedOutletsInput = document.getElementById('proposedOutlets');
+        const addRoofButton = document.getElementById('addRoofButton');
+        // Live Preview
+        const liveCalculationPreviewDiv = document.getElementById('liveCalculationPreview');
+        const liveTotalRunoff = document.getElementById('liveTotalRunoff');
+        const liveOutletCapacity = document.getElementById('liveOutletCapacity');
+        const liveMinOutlets = document.getElementById('liveMinOutlets');
+        const liveStatus = document.getElementById('liveStatus');
+        // Added Roofs Display
+        const addedRoofsListSection = document.getElementById('addedRoofsListSection');
+        const overallProjectName = document.getElementById('overallProjectName');
+        const overallSFRef = document.getElementById('overallSFRef');
+        const addedRoofsContainer = document.getElementById('addedRoofsContainer');
+
+        // --- State & Settings ---
+        let globalProjectData = null; // From t_project.html
+        let drainageSettings = null; // From t_settings.html (specifically drainageCalculatorSettings)
+        let defaultDrainageAppSettings = null; // Hardcoded defaults for drainage outlets
+        
+        let currentDrainageProject = { // Data specific to this drainage calculation session
+            details: {},
+            roofs: []
+        };
+        let originalBuildingLife = "60"; // To handle building life changes due to falls
+
+        const DRAINAGE_PAGE_SESSION_KEY = 'currentRainLoadProjectState'; // For saving this page's overall state
+
+        // --- Initialization ---
+        if (currentYearSpan) currentYearSpan.textContent = new Date().getFullYear();
+        loadGlobalProjectData();
+        loadDrainageSettingsAndDefaults(); // This populates outletTypeSelect
+        loadCurrentDrainageProjectState(); // Load this page's saved state if any
+        setupEventListeners();
+        updateLiveCalculationPreview(); // Initial call
+
+        // --- Data Loading ---
+        function loadGlobalProjectData() {
+            const dataString = sessionStorage.getItem('currentProjectData');
+            if (dataString) {
+                globalProjectData = JSON.parse(dataString);
+                displaySFRef.textContent = globalProjectData.projectSFRef || 'N/A';
+                displayProjectName.textContent = globalProjectData.projectName || 'N/A';
+                // Set overall display for added roofs section
+                overallSFRef.textContent = globalProjectData.projectSFRef || 'N/A';
+                overallProjectName.textContent = globalProjectData.projectName || 'N/A';
+                // Default drainage project postcode if not already set in drainage specific data
+                if (!currentDrainageProject.details.drainageProjectPostcode && globalProjectData.projectAddress?.postcode) {
+                    drainageProjectPostcode.value = globalProjectData.projectAddress.postcode;
+                    currentDrainageProject.details.drainageProjectPostcode = drainageProjectPostcode.value;
+                }
+            } else {
+                displaySFRef.textContent = 'Not Set'; displayProjectName.textContent = 'Not Set';
+                overallSFRef.textContent = 'Not Set'; overallProjectName.textContent = 'Not Set';
+            }
+        }
+
+        function loadDrainageSettingsAndDefaults() {
+            defaultDrainageAppSettings = { /* PASTE drainage part of defaultGlobalAppSettings from t_settings.html */ 
+                outletTypeData: [ { id: "pvc_angled_63", name: "PVC angled 63", defaultFlow: 0.5, maxFlow: null, maxSump: null, sumpable: "N", leafguard: "No", spigotMm: 500, system: "Armourplan" }, { id: "pvc_angled_75", name: "PVC angled 75", defaultFlow: 0.6, maxFlow: null, maxSump: null, sumpable: "N", leafguard: "No", spigotMm: 500, system: "Armourplan" }, { id: "pvc_angled_90", name: "PVC angled 90", defaultFlow: 0.8, maxFlow: null, maxSump: null, sumpable: "N", leafguard: "No", spigotMm: 500, system: "Armourplan" }, { id: "pvc_angled_110", name: "PVC angled 110", defaultFlow: 0.9, maxFlow: null, maxSump: null, sumpable: "N", leafguard: "No", spigotMm: 500, system: "Armourplan" }, { id: "pvc_vertical_50", name: "PVC vertical 50*", defaultFlow: 1.1, maxFlow: null, maxSump: null, sumpable: "N", leafguard: "No", spigotMm: 320, system: "Armourplan" }, { id: "pvc_vertical_56", name: "PVC vertical 56", defaultFlow: 1.2, maxFlow: null, maxSump: null, sumpable: "N", leafguard: "No", spigotMm: 320, system: "Armourplan" }, { id: "pvc_vertical_63", name: "PVC vertical 63", defaultFlow: 1.6, maxFlow: null, maxSump: null, sumpable: "N", leafguard: "universal", spigotMm: 320, system: "Armourplan" }, { id: "pvc_vertical_75", name: "PVC vertical 75*", defaultFlow: 4.0, maxFlow: null, maxSump: null, sumpable: "N", leafguard: "universal", spigotMm: 320, system: "Armourplan" }, { id: "pvc_vertical_90", name: "PVC vertical 90*", defaultFlow: 5.3, maxFlow: 6.5, maxSump: 5, sumpable: "Y", leafguard: "universal", spigotMm: 320, system: "Armourplan" }, { id: "pvc_vertical_95", name: "PVC vertical 95", defaultFlow: 2.7, maxFlow: null, maxSump: null, sumpable: "N", leafguard: "universal", spigotMm: 320, system: "Armourplan" }, { id: "pvc_vertical_110", name: "PVC vertical 110*", defaultFlow: 5.6, maxFlow: 11.6, maxSump: 21, sumpable: "Y", leafguard: "universal", spigotMm: 320, system: "Armourplan" }, { id: "pvc_vertical_125", name: "PVC vertical 125*", defaultFlow: 5.6, maxFlow: 16.7, maxSump: 34, sumpable: "Y", leafguard: "universal", spigotMm: 320, system: "Armourplan" }, { id: "pvc_vertical_140", name: "PVC vertical 140.", defaultFlow: 3.9, maxFlow: null, maxSump: null, sumpable: "N", leafguard: "universal", spigotMm: 320, system: "Armourplan" }, { id: "pvc_vertical_160", name: "PVC vertical 160*", defaultFlow: 5.7, maxFlow: 33.3, maxSump: 59, sumpable: "Y", leafguard: "universal", spigotMm: 320, system: "Armourplan" }, { id: "pvc_180x80_scupper", name: "PVC 180x80 scupper", defaultFlow: 2.0, maxFlow: 33.3, maxSump: 74, sumpable: "Y", leafguard: "No", spigotMm: 600, system: "Armourplan" }, { id: "pvc_300x100_scupper", name: "PVC 300x100 scupper", defaultFlow: 3.1, maxFlow: 33.3, maxSump: 46, sumpable: "Y", leafguard: "No", spigotMm: 600, system: "Armourplan" }, { id: "pvc_refurb_63", name: "PVC refurb 63", defaultFlow: 1.2, maxFlow: null, maxSump: null, sumpable: "N", leafguard: "universal", spigotMm: 400, system: "Armourplan" }, { id: "pvc_refurb_75", name: "PVC refurb 75", defaultFlow: 2.1, maxFlow: null, maxSump: null, sumpable: "N", leafguard: "universal", spigotMm: 400, system: "Armourplan" }, { id: "pvc_refurb_90", name: "PVC refurb 90", defaultFlow: 2.5, maxFlow: null, maxSump: null, sumpable: "N", leafguard: "universal", spigotMm: 400, system: "Armourplan" }, { id: "pvc_refurb_100", name: "PVC refurb 100", defaultFlow: 2.8, maxFlow: null, maxSump: null, sumpable: "N", leafguard: "universal", spigotMm: 400, system: "Armourplan" }, { id: "pvc_refurb_110", name: "PVC refurb 110", defaultFlow: 3.0, maxFlow: null, maxSump: null, sumpable: "N", leafguard: "universal", spigotMm: 400, system: "Armourplan" }, { id: "pvc_refurb_125", name: "PVC refurb 125", defaultFlow: 3.5, maxFlow: null, maxSump: null, sumpable: "N", leafguard: "universal", spigotMm: 400, system: "Armourplan" }, { id: "pvc_refurb_160", name: "PVC refurb 160", defaultFlow: 4.1, maxFlow: null, maxSump: null, sumpable: "N", leafguard: "universal", spigotMm: 400, system: "Armourplan" }, { id: "easy_flow_70", name: "Easy-Flow 70*", defaultFlow: 0.6, maxFlow: 4.1, maxSump: 110, sumpable: "Y", leafguard: "Integral", spigotMm: 1000, system: "Armourplan" }, { id: "easy_flow_100", name: "EasyFlow 100*", defaultFlow: 0.8, maxFlow: 10.6, maxSump: 145, sumpable: "Y", leafguard: "Integral", spigotMm: 1000, system: "Armourplan" }, { id: "trendy_70", name: "Trendy 70*", defaultFlow: 4.1, maxFlow: null, maxSump: null, sumpable: "N", leafguard: "Integral", spigotMm: 210, system: "Armourplan" }, { id: "trendy_90", name: "Trendy 90*", defaultFlow: 6.3, maxFlow: 8.1, maxSump: 8, sumpable: "Y", leafguard: "Integral", spigotMm: 125, system: "Armourplan" }, { id: "trendy_100", name: "Trendy 100*", defaultFlow: 6.2, maxFlow: 10.7, maxSump: 23, sumpable: "Y", leafguard: "Integral", spigotMm: 210, system: "Armourplan" }, { id: "trendy_125", name: "Trendy 125*", defaultFlow: 6.3, maxFlow: 19.4, maxSump: 46, sumpable: "Y", leafguard: "Integral", spigotMm: 210, system: "Armourplan" }, { id: "ss_vertical_70", name: "SS vertical 70", defaultFlow: null, maxFlow: null, maxSump: 78, sumpable: "Y", leafguard: "universal", spigotMm: 400, system: "Spectraplan" }, { id: "ss_vertical_90", name: "SS vertical 90", defaultFlow: null, maxFlow: null, maxSump: 250, sumpable: "Y", leafguard: "universal", spigotMm: 400, system: "Spectraplan" }, { id: "ss_vertical_110", name: "SS vertical 110", defaultFlow: null, maxFlow: null, maxSump: 517, sumpable: "Y", leafguard: "universal", spigotMm: 400, system: "Spectraplan" }, { id: "ss_vertical_110_600", name: "SS vertical 110/600", defaultFlow: null, maxFlow: null, maxSump: 517, sumpable: "Y", leafguard: "universal", spigotMm: 600, system: "Spectraplan" }, { id: "ss_vertical_125", name: "SS vertical 125", defaultFlow: null, maxFlow: null, maxSump: 390, sumpable: "Y", leafguard: "universal", spigotMm: 400, system: "Spectraplan" }, { id: "ss_parapet_75", name: "SS parapet 75", defaultFlow: null, maxFlow: null, maxSump: 187, sumpable: "Y", leafguard: "No", spigotMm: 400, system: "Spectraplan" } ]
+            };
+            const settingsString = sessionStorage.getItem('drainageCalculatorSettings');
+            if (settingsString) {
+                const storedSettings = JSON.parse(settingsString);
+                drainageSettings = { // Merge, preferring stored if keys exist
+                    ...defaultDrainageAppSettings, // Start with all default keys
+                    ...storedSettings,         // Override with stored data
+                    // Ensure outletTypeData is properly taken from store or default
+                    outletTypeData: storedSettings.outletTypeData && storedSettings.outletTypeData.length > 0 
+                                    ? storedSettings.outletTypeData 
+                                    : defaultDrainageAppSettings.outletTypeData
+                };
+            } else {
+                drainageSettings = JSON.parse(JSON.stringify(defaultDrainageAppSettings));
+            }
+            populateOutletTypeDropdown();
+        }
+        function loadCurrentDrainageProjectState() {
+            const storedState = sessionStorage.getItem(DRAINAGE_PAGE_SESSION_KEY);
+            if (storedState) {
+                currentDrainageProject = JSON.parse(storedState);
+                // Populate Drainage Project Details form
+                Object.keys(currentDrainageProject.details).forEach(key => {
+                    if (mainDrainageProjectForm.elements[key]) {
+                        mainDrainageProjectForm.elements[key].value = currentDrainageProject.details[key];
+                    }
+                });
+                originalBuildingLife = currentDrainageProject.details.drainageBuildingLife || "60";
+            } else { // Set defaults if no saved state
+                mainDrainageProjectForm.drainageRainfallRate.value = "0.021";
+                mainDrainageProjectForm.drainageSafetyFactor.value = "1.5";
+                mainDrainageProjectForm.drainageBuildingLife.value = "60";
+                originalBuildingLife = "60";
+                mainDrainageProjectForm.drainageRoofingSystem.value = "Armourplan";
+                // Update currentDrainageProject.details with these defaults
+                updateDrainageProjectDetails();
+            }
+            renderAddedRoofs(); // Render any roofs from loaded state
+        }
+        function saveCurrentDrainageProjectState() {
+            updateDrainageProjectDetails(); // Ensure details are fresh before saving
+            sessionStorage.setItem(DRAINAGE_PAGE_SESSION_KEY, JSON.stringify(currentDrainageProject));
+        }
+        function updateDrainageProjectDetails() {
+            const formData = new FormData(mainDrainageProjectForm);
+            currentDrainageProject.details = {}; // Clear before repopulating
+            for (let [key, value] of formData.entries()) {
+                currentDrainageProject.details[key] = value;
+            }
+        }
+
+        function initializeRoofDataFormDefaults() {
+            addRoofForm.reset(); // Clears all fields
+            roofFallsSelect.value = "1:80+";
+            sumpDepthInput.value = "0";
+            // Building life warning handled by roofFallsSelect change event
+            handleRoofFallsChange(); // Call to set initial state based on default falls
+            selectedOutletInfoDisplayDiv.style.display = 'none';
+            roofNameError.style.display = 'none';
+            roofNameInput.classList.remove('error-field');
+        }
+        function populateOutletTypeDropdown() {
+            if (!drainageSettings || !drainageSettings.outletTypeData) return;
+            outletTypeSelect.innerHTML = '<option value="">Select Outlet...</option>';
+            drainageSettings.outletTypeData.forEach(outlet => {
+                const option = document.createElement('option');
+                option.value = outlet.id;
+                option.textContent = outlet.name;
+                outletTypeSelect.appendChild(option);
+            });
+        }
+        function updateSelectedOutletInfo() {
+            const selectedOutletId = outletTypeSelect.value;
+            selectedOutletInfoDisplayDiv.innerHTML = '';
+            selectedOutletInfoDisplayDiv.style.display = 'none';
+            if (selectedOutletId && drainageSettings && drainageSettings.outletTypeData) {
+                const outlet = drainageSettings.outletTypeData.find(o => o.id === selectedOutletId);
+                if (outlet) {
+                    let infoHTML = `<p><strong>Default Flow:</strong> ${outlet.defaultFlow !== null ? outlet.defaultFlow.toFixed(1) + ' l/s' : '-'}</p>`;
+                    if (outlet.sumpable === 'Y') {
+                         infoHTML += `<p class="text-green-600"><strong>Sumpable: Yes</strong> (Max Flow: ${outlet.maxFlow !== null ? outlet.maxFlow.toFixed(1) + ' l/s' : '-'} at ${outlet.maxSump !== null ? outlet.maxSump + 'mm' : '-'})</p>`;
+                    } else {
+                        infoHTML += `<p><strong>Sumpable:</strong> No</p>`;
+                    }
+                    selectedOutletInfoDisplayDiv.innerHTML = infoHTML;
+                    selectedOutletInfoDisplayDiv.style.display = 'block';
+                }
+            }
+            updateLiveCalculationPreview();
+        }
+        function handleRoofFallsChange() {
+            const selectedFall = roofFallsSelect.value;
+            if (selectedFall === "<1:80" || selectedFall === "Green Roof") {
+                if (drainageBuildingLife.value !== "1") { // Store current user/default value if not already 1
+                    originalBuildingLife = drainageBuildingLife.value;
+                }
+                drainageBuildingLife.value = "1";
+                drainageBuildingLife.disabled = true;
+                buildingLifeWarningDiv.style.display = 'block';
+            } else { // "1:80+"
+                drainageBuildingLife.disabled = false;
+                drainageBuildingLife.value = originalBuildingLife; // Restore
+                buildingLifeWarningDiv.style.display = 'none';
+            }
+            updateDrainageProjectDetails(); // Update details in memory
+            saveCurrentDrainageProjectState(); // Persist this change
+        }
+
+        // --- Live Calculation Preview ---
+        function updateLiveCalculationPreview() {
+            const catchment = parseFloat(catchmentAreaInput.value);
+            const rainfall = parseFloat(drainageRainfallRate.value); // From main project details
+            const safetyFactor = parseFloat(drainageSafetyFactor.value); // From main project details
+            const selectedOutletId = outletTypeSelect.value;
+            const proposedCount = parseInt(proposedOutletsInput.value);
+
+            if (isNaN(catchment) || catchment <= 0 || isNaN(rainfall) || rainfall <= 0 || isNaN(safetyFactor) || !selectedOutletId) {
+                liveCalculationPreviewDiv.style.display = 'none';
+                return;
+            }
+
+            const outlet = drainageSettings.outletTypeData.find(o => o.id === selectedOutletId);
+            if (!outlet || outlet.defaultFlow === null || outlet.defaultFlow <= 0) {
+                liveCalculationPreviewDiv.style.display = 'none';
+                return;
+            }
+            // For now, using defaultFlow. Advanced would use sumped flow if applicable.
+            const outletCapacity = outlet.defaultFlow; 
+            const totalRunoff = catchment * rainfall * safetyFactor;
+            const minOutlets = Math.ceil(totalRunoff / outletCapacity);
+
+            liveTotalRunoff.textContent = totalRunoff.toFixed(2);
+            liveOutletCapacity.textContent = outletCapacity.toFixed(2);
+            liveMinOutlets.textContent = minOutlets;
+
+            let statusText = "Info pending proposed count";
+            liveStatus.className = ""; // Clear previous classes
+
+            if (!isNaN(proposedCount) && proposedCount >= 0) {
+                if (proposedCount < minOutlets) {
+                    statusText = "Insufficient Outlets";
+                    liveStatus.classList.add('status-error');
+                } else if (proposedCount === minOutlets) {
+                    statusText = "OK - Minimum Met";
+                    liveStatus.classList.add('status-ok');
+                } else { // proposedCount > minOutlets
+                    statusText = "OK - More than minimum";
+                    liveStatus.classList.add('status-ok'); // Or a specific class for "more than enough"
+                }
+            }
+            liveStatus.textContent = statusText;
+            liveCalculationPreviewDiv.style.display = 'block';
+        }
+        
+        // --- Event Listeners ---
+        function setupEventListeners() {
+            // For Drainage Project Details form
+            Array.from(mainDrainageProjectForm.elements).forEach(element => {
+                element.addEventListener('change', () => { 
+                    updateDrainageProjectDetails(); 
+                    saveCurrentDrainageProjectState();
+                    if (element.id === 'drainageRainfallRate' || element.id === 'drainageSafetyFactor') {
+                        updateLiveCalculationPreview(); // Rainfall/SF change affects live preview
+                    }
+                });
+            });
+            roofFallsSelect.addEventListener('change', handleRoofFallsChange); // Also updates live preview via save state
+            
+            // For Add Roof Area form (triggers live preview)
+            const livePreviewTriggers = [catchmentAreaInput, outletTypeSelect, proposedOutletsInput, sumpDepthInput];
+            livePreviewTriggers.forEach(el => el.addEventListener('input', updateLiveCalculationPreview));
+            outletTypeSelect.addEventListener('change', updateSelectedOutletInfo); // Also calls live preview
+
+            addRoofButton.addEventListener('click', handleAddRoof);
+        }
+
+        // --- Add Roof Logic ---
+        function handleAddRoof() {
+            roofNameError.style.display = 'none'; roofNameInput.classList.remove('error-field');
+            let isValid = true;
+            const newRoof = {};
+            const requiredFields = { roofName: "Roof Name", catchmentArea: "Catchment Area", sumpDepth: "Sump Depth", outletType: "Outlet Type", proposedOutlets: "Proposed Outlets"};
+            
+            // Validate Add Roof Form
+            Object.keys(requiredFields).forEach(key => {
+                const inputElement = addRoofForm.elements[key];
+                if (!inputElement.value.trim()) {
+                    isValid = false; inputElement.classList.add('error-field');
+                } else { inputElement.classList.remove('error-field'); }
+                newRoof[key] = inputElement.value.trim();
+            });
+            if (parseFloat(newRoof.catchmentArea) <= 0) { isValid = false; catchmentAreaInput.classList.add('error-field');}
+            if (parseFloat(newRoof.sumpDepth) < 0) { isValid = false; sumpDepthInput.classList.add('error-field');}
+             if (parseInt(newRoof.proposedOutlets) < 0) { isValid = false; proposedOutletsInput.classList.add('error-field');}
+
+
+            const isNameDuplicate = currentDrainageProject.roofs.some(r => r.inputs.roofName.toLowerCase() === newRoof.roofName.toLowerCase());
+            if (newRoof.roofName && isNameDuplicate) {
+                roofNameError.textContent = 'Roof name already exists. Please use a unique name.';
+                roofNameError.style.display = 'block'; roofNameInput.classList.add('error-field'); isValid = false;
+            }
+
+            if (!isValid) { alert("Please fill all required fields (*) in 'Add Roof Area' correctly."); return; }
+
+            // Perform final calculation for this roof
+            const rainfall = parseFloat(currentDrainageProject.details.drainageRainfallRate) || 0.021;
+            const safetyFactor = parseFloat(currentDrainageProject.details.drainageSafetyFactor) || 1.5;
+            const catchment = parseFloat(newRoof.catchmentArea);
+            
+            const selectedOutlet = drainageSettings.outletTypeData.find(o => o.id === newRoof.outletType);
+            if (!selectedOutlet || selectedOutlet.defaultFlow === null || selectedOutlet.defaultFlow <=0) {
+                alert("Invalid outlet type selected or outlet has no valid flow rate."); return;
+            }
+            
+            const outletCapacity = selectedOutlet.defaultFlow; // Using defaultFlow for now
+            const totalRunoff = catchment * rainfall * safetyFactor;
+            const minOutlets = Math.ceil(totalRunoff / outletCapacity);
+            const proposedCount = parseInt(newRoof.proposedOutlets);
+            let statusText = "";
+            if (proposedCount < minOutlets) statusText = "Insufficient";
+            else if (proposedCount === minOutlets) statusText = "OK (Minimum)";
+            else statusText = "OK (Sufficient)";
+
+            const roofToAdd = {
+                inputs: newRoof,
+                calculations: {
+                    totalRunoff: totalRunoff.toFixed(3),
+                    outletUsedCapacity: outletCapacity.toFixed(2),
+                    minOutletsRequired: minOutlets,
+                    status: statusText,
+                    outletDetails: { name: selectedOutlet.name, sumpable: selectedOutlet.sumpable, maxSump: selectedOutlet.maxSump, maxFlow: selectedOutlet.maxFlow }
+                }
+            };
+            currentDrainageProject.roofs.push(roofToAdd);
+            saveCurrentDrainageProjectState();
+            renderAddedRoofs();
+            initializeRoofDataFormDefaults(); // Clear form for next entry
+            liveCalculationPreviewDiv.style.display = 'none'; // Hide live preview after adding
+            addedRoofsListSection.style.display = 'block';
+        }
+
+        function renderAddedRoofs() {
+            addedRoofsContainer.innerHTML = '';
+            if (!currentDrainageProject.roofs || currentDrainageProject.roofs.length === 0) {
+                addedRoofsContainer.innerHTML = '<p class="text-gray-500 italic">No roof areas added yet.</p>';
+                addedRoofsListSection.style.display = 'none';
+                return;
+            }
+            addedRoofsListSection.style.display = 'block';
+            currentDrainageProject.roofs.forEach((roof, index) => {
+                const i = roof.inputs;
+                const c = roof.calculations;
+                const card = document.createElement('div');
+                card.className = 'added-roof-item';
+                card.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <h4>${i.roofName || `Roof Area ${index + 1}`}</h4>
+                        <button type="button" class="text-xs text-red-500 hover:text-red-700 remove-roof-btn" data-index="${index}" title="Remove Roof Area">&times; Remove</button>
+                    </div>
+                    <div class="added-roof-details">
+                        <span><strong>Falls:</strong> ${i.roofFalls}</span>
+                        <span><strong>Catchment:</strong> ${i.catchmentArea} m²</span>
+                        <span><strong>Sump:</strong> ${i.sumpDepth} mm</span>
+                        <span><strong>Outlet:</strong> ${c.outletDetails.name}</span>
+                        <span><strong>Proposed #:</strong> ${i.proposedOutlets}</span>
+                    </div>
+                    <div class="calc-results-summary">
+                        <p><strong>Total Runoff:</strong> ${c.totalRunoff} l/s</p>
+                        <p><strong>Outlet Capacity Used:</strong> ${c.outletUsedCapacity} l/s</p>
+                        <p><strong>Min. Outlets Required:</strong> ${c.minOutletsRequired}</p>
+                        <p><strong>Status:</strong> <span class="${c.status.startsWith('OK') ? 'status-ok' : 'status-error'}">${c.status}</span></p>
+                    </div>
+                `;
+                addedRoofsContainer.appendChild(card);
+            });
+
+            document.querySelectorAll('.remove-roof-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const roofIndexToRemove = parseInt(this.dataset.index);
+                    currentDrainageProject.roofs.splice(roofIndexToRemove, 1);
+                    saveCurrentDrainageProjectState();
+                    renderAddedRoofs();
+                });
+            });
+        }
+    });
+    // --- END Polytec Rain Load Calculator Logic ---
+    </script>
+</body>
+</html>

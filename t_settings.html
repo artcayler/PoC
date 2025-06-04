@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Settings - Polytec Tools</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* bg-gray-100 */
+        }
+        .breadcrumb-link { color: #4f46e5; text-decoration: none; }
+        .breadcrumb-link:hover { text-decoration: underline; }
+        .back-to-tools-btn {
+            padding: 0.5rem 1rem; background-color: #64748b; color: white;
+            border-radius: 0.375rem; text-decoration: none; transition: background-color 0.3s ease;
+            font-weight: 500;
+        }
+        .back-to-tools-btn:hover { background-color: #475569; }
+
+        .settings-container {
+            background-color: white; padding: 1.5rem; border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+        }
+        .settings-main-section { margin-bottom: 3rem; } /* Added for spacing between Wind and Drainage sections */
+        .settings-section h3 { /* For main section titles like Wind Uplift / Drainage */
+            font-size: 1.5rem; /* text-2xl */ font-weight: 700; color: #111827; /* gray-900 */
+            margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: 2px solid #4f46e5; /* indigo-600 */
+        }
+        .settings-subsection { margin-bottom: 2.5rem; } /* For subsections like Cpe, Cpi, Outlets */
+        .settings-subsection h4 { /* For subsection titles */
+            font-size: 1.25rem; font-weight: 600; color: #1f2937;
+            margin-bottom: 1rem; border-bottom: 1px solid #e5e7eb; padding-bottom: 0.5rem;
+        }
+        .settings-description { font-size: 0.875rem; color: #4b5563; margin-bottom: 1rem; }
+
+        .results-table { width: 100%; margin-top: 0.5rem; border-collapse: collapse; font-size: 0.875rem; }
+        .results-table th, .results-table td { border: 1px solid #d1d5db; padding: 0.65rem; text-align: left; }
+        .results-table th { background-color: #f9fafb; font-weight: 600; color: #374151; }
+        .results-table td.row-title { font-weight: 500; color: #4b5563; white-space: nowrap; }
+        .results-table td.text-right-input { text-align: right; } /* For aligning inputs in cells */
+        .results-table td.row-title { text-align: left; }
+        .setting-input {
+            width: 100%; max-width: 120px; padding: 0.25rem 0.5rem; border-radius: 0.375rem;
+            border: 1px solid #d1d5db; text-align: right;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+        .setting-input.text-input-medium { max-width: 180px; text-align: left; }
+        .setting-input.text-input-small { max-width: 100px; text-align: left; }
+        .setting-input:focus {
+            border-color: #4f46e5; outline: none;
+            box-shadow: 0 0 0 0.2rem rgba(79, 70, 229, 0.25);
+        }
+        .deck-name-input { text-align: left; max-width: none; }
+        .table-wrapper { max-height: 400px; overflow-y: auto; }
+
+
+        .action-btn {
+            font-weight: 600; padding: 0.6rem 1.2rem; border-radius: 0.375rem;
+            transition: background-color 0.3s, border-color 0.3s;
+            border: 1px solid transparent; cursor: pointer; margin-right: 0.75rem; margin-bottom: 0.5rem;
+        }
+        .save-btn { background-color: #4f46e5; color: white; }
+        .save-btn:hover { background-color: #4338ca; }
+        .restore-btn { background-color: #f97316; color: white; }
+        .restore-btn:hover { background-color: #ea580c; }
+
+        .message-area {
+            margin-top: 1.5rem; padding: 0.75rem 1rem; border-radius: 0.375rem;
+            font-size: 0.9rem; min-height: 40px;
+        }
+        .success-message { background-color: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
+        .error-message { background-color: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+        .info-message { background-color: #e0e7ff; color: #3730a3; border: 1px solid #a5b4fc; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <header class="bg-gray-800 text-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <a href="index.html" class="text-xl font-bold hover:text-indigo-300">Polytec Hub</a>
+            <nav aria-label="Breadcrumb" class="hidden sm:inline-flex">
+                <ol class="list-none p-0 inline-flex text-sm">
+                    <li class="flex items-center"><a href="index.html" class="breadcrumb-link hover:text-indigo-200">Portal</a><svg class="fill-current w-3 h-3 mx-2 text-gray-500" viewBox="0 0 20 20"><path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"/></svg></li>
+                    <li class="flex items-center"><a href="tools.html" class="breadcrumb-link hover:text-indigo-200">Tools Section</a><svg class="fill-current w-3 h-3 mx-2 text-gray-500" viewBox="0 0 20 20"><path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"/></svg></li>
+                    <li class="flex items-center"><span class="text-gray-400">Global Settings</span></li>
+                </ol>
+            </nav>
+            <a href="tools.html" class="back-to-tools-btn text-sm">&larr; All Tools</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8 flex-grow">
+        <div class="settings-container max-w-6xl mx-auto"> <h1 class="text-3xl font-bold text-gray-800 mb-2 text-center">Global Application Settings</h1>
+            <p class="text-center text-gray-600 mb-8">
+                Modify default parameters for calculators. Changes saved here will apply for the current session.
+            </p>
+            <div id="settingsMessage" class="message-area mb-6" role="alert" aria-live="polite"></div>
+
+
+            <div id="windUpliftSettingsSection" class="settings-main-section">
+                <h3>Wind Uplift Calculator Settings</h3>
+                
+                <section class="settings-subsection">
+                    <h4>External Pressure Coefficients (Cpe) - Flat Roof with Parapets</h4>
+                    <p class="settings-description">Values used to determine Cpe based on parapet height ratio (h<sub>p</sub>/h).</p>
+                    <div class="overflow-x-auto">
+                        <table class="results-table min-w-full" id="settingsCpeParapetsTable">
+                            <thead><tr><th>Type (h<sub>p</sub>/h ratio)</th><th>Zone F (Cpe)</th><th>Zone G (Cpe)</th><th>Zone H (Cpe)</th><th>Zone I (Cpe)</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section class="settings-subsection">
+                    <h4>Internal Pressure Coefficients (Cpi)</h4>
+                    <p class="settings-description">Values selected based on substrate information in the calculator.</p>
+                    <div class="overflow-x-auto">
+                        <table class="results-table min-w-full" id="settingsCpiTable">
+                            <thead><tr><th>Internal Pressure Condition</th><th>Zone F (Cpi)</th><th>Zone G (Cpi)</th><th>Zone H (Cpi)</th><th>Zone I (Cpi)</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section class="settings-subsection">
+                    <h4>Structural Deck Properties</h4>
+                    <p class="settings-description">Default values for predefined deck types.</p>
+                    <div class="overflow-x-auto">
+                        <table class="results-table min-w-full" id="settingsDeckTable">
+                            <thead><tr><th>Deck Type Name (Editable)</th><th>Pitch (mm) (Editable)</th><th>Bonding Area (%) (Editable)</th><th>Is Manual Type?</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section class="settings-subsection">
+                    <h4>Deck Bonding Area vs. Max Uplift</h4>
+                    <p class="settings-description">Reference table for maximum uplift based on contact area percentage. Values are editable.</p>
+                    <div class="overflow-x-auto table-wrapper">
+                        <table class="results-table min-w-full" id="settingsBondingUpliftTable">
+                            <thead><tr><th>Contact Area %</th><th>Max Uplift (kN) (Editable)</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <div class="flex flex-wrap items-center pt-6 border-t border-gray-200 mt-6">
+                    <button type="button" id="saveWindSettings" class="action-btn save-btn">Save Wind Uplift Settings</button>
+                    <button type="button" id="restoreWindDefaults" class="action-btn restore-btn">Restore Wind Uplift Defaults</button>
+                </div>
+            </div>
+            <div id="drainageCalcSettingsSection" class="settings-main-section">
+                <h3>Drainage Calculator Settings</h3>
+                <section class="settings-subsection">
+                    <h4>Outlet Types & Properties</h4>
+                    <p class="settings-description">Default properties for available drainage outlet types.</p>
+                    <div class="overflow-x-auto">
+                        <table class="results-table min-w-full" id="settingsDrainageOutletTable">
+                            <thead>
+                                <tr>
+                                    <th>Name (Editable)</th>
+                                    <th>Default Flow (l/s @35mm)</th>
+                                    <th>Max Flow (l/s)</th>
+                                    <th>Max Sump (mm)</th>
+                                    <th>Sumpable (Y/N)</th>
+                                    <th>Leafguard</th>
+                                    <th>Spigot (mm)</th>
+                                    <th>System</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                </tbody>
+                        </table>
+                    </div>
+                </section>
+                <div class="flex flex-wrap items-center pt-6 border-t border-gray-200 mt-6">
+                    <button type="button" id="saveDrainageSettings" class="action-btn save-btn">Save Drainage Settings</button>
+                    <button type="button" id="restoreDrainageDefaults" class="action-btn restore-btn">Restore Drainage Defaults</button>
+                </div>
+            </div>
+            </div>
+    </main>
+
+    <footer class="bg-gray-700 text-gray-300 text-center p-4 mt-auto">
+        <p>&copy; <span id="currentYear"></span> Cayler. All rights reserved.</p>
+    </footer>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const currentYearSpan = document.getElementById('currentYear');
+        if (currentYearSpan) currentYearSpan.textContent = new Date().getFullYear();
+
+        const messageArea = document.getElementById('settingsMessage');
+        
+        // Wind Uplift Elements
+        const saveWindButton = document.getElementById('saveWindSettings');
+        const restoreWindButton = document.getElementById('restoreWindDefaults');
+        const cpeTableBody = document.getElementById('settingsCpeParapetsTable').querySelector('tbody');
+        const cpiTableBody = document.getElementById('settingsCpiTable').querySelector('tbody');
+        const deckTableBody = document.getElementById('settingsDeckTable').querySelector('tbody');
+        const bondingUpliftTableBody = document.getElementById('settingsBondingUpliftTable').querySelector('tbody');
+        const WIND_SESSION_KEY = 'windUpliftCalculatorSettings';
+        const ZONES = ['F', 'G', 'H', 'I'];
+
+        // Drainage Elements
+        const saveDrainageButton = document.getElementById('saveDrainageSettings');
+        const restoreDrainageButton = document.getElementById('restoreDrainageDefaults');
+        const drainageOutletTableBody = document.getElementById('settingsDrainageOutletTable').querySelector('tbody');
+        const DRAINAGE_SESSION_KEY = 'drainageCalculatorSettings';
+
+
+        // --- Default Settings Objects ---
+        const defaultGlobalAppSettings = {
+            windUplift: { /* PASTE FULL defaultWindAppSettings.windUplift from previous correct answer here */ 
+                cpeByParapetRatio: { no_parapet: { name: "No Parapet (ratio < 0.05)", F: -2.0, G: -1.4, H: -0.7, I: -0.2 }, parapet_005: { name: "Parapet ~0.05 (0.05 ≤ ratio < 0.10)", F: -1.90, G: -1.30, H: -0.70, I: -0.20 }, parapet_010: { name: "Parapet ~0.10 (0.10 ≤ ratio < 0.20)", F: -1.85, G: -1.30, H: -0.70, I: -0.20 }, parapet_020: { name: "Parapet ~0.20 (ratio ≥ 0.20)", F: -1.40, G: -1.00, H: -0.70, I: -0.20 }},
+                internalPressureCoefficients: { default_cpi:    { name: "Default", zones: { F: 0.2, G: 0.2, H: 0.2, I: 0.2 }}, air_tight_cpi:  { name: "Air Tight Deck (Permeability: No)", zones: { F: 0.0, G: 0.0, H: 0.0, I: 0.0 }}, dominant_opening_cpi: { name: "Dominant Opening (Opening: Yes)", zones: { F: 0.7, G: 0.7, H: 0.7, I: 0.7 }}},
+                structuralDeckData: [ { id: "timber", name: "Timber", pitch: 120, bondingArea: 100, isManual: false }, { id: "concrete", name: "Concrete", pitch: 120, bondingArea: 100, isManual: false }, { id: "d32s", name: "D32S", pitch: 200, bondingArea: 51, isManual: false }, { id: "d35", name: "D35", pitch: 150, bondingArea: 50, isManual: false }, { id: "d46", name: "D46", pitch: 225, bondingArea: 37, isManual: false }, { id: "d60", name: "D60", pitch: 200, bondingArea: 36, isManual: false }, { id: "d100", name: "D100", pitch: 233.3, bondingArea: 33, isManual: false }, { id: "d137_135", name: "D137/135", pitch: 310, bondingArea: 35, isManual: false }, { id: "d159", name: "D159", pitch: 250, bondingArea: 33, isManual: false }, { id: "d153", name: "D153", pitch: 280, bondingArea: 35, isManual: false }, { id: "d200", name: "D200", pitch: 375, bondingArea: 39, isManual: false }, { id: "firth_sr30_plus", name: "Firth SR30+", pitch: 200, bondingArea: 60, isManual: false }, { id: "firth_sr35_plus", name: "Firth SR35+", pitch: 150, bondingArea: 46, isManual: false }, { id: "firth_sr60_plus", name: "Firth SR60+", pitch: 213, bondingArea: 46, isManual: false }, { id: "firth_sr100_plus", name: "Firth SR100+", pitch: 240, bondingArea: 42, isManual: false }, { id: "ji_265_1060", name: "JI 265-1060", pitch: 265, bondingArea: 73, isManual: false }, { id: "ji_252_1010", name: "JI 252-1010", pitch: 252.5, bondingArea: 71, isManual: false }, { id: "ji_225_900", name: "JI 225-900", pitch: 225, bondingArea: 68, isManual: false }, { id: "ji_195_780", name: "JI 73-195-780", pitch: 195, bondingArea: 64, isManual: false }, { id: "ji_280_1120", name: "JI 280-1120", pitch: 280, bondingArea: 42, isManual: false }, { id: "ji_275_825", name: "JI 100-275-825", pitch: 275, bondingArea: 50, isManual: false }, { id: "ji_250_750", name: "JI 250-750", pitch: 250, bondingArea: 56, isManual: false }, { id: "ji_320_960", name: "JI 320-960", pitch: 320, bondingArea: 54, isManual: false }, { id: "ji_310_930", name: "JI 310-930", pitch: 310, bondingArea: 46, isManual: false }, { id: "ji_280_840", name: "JI 280-840", pitch: 280, bondingArea: 42, isManual: false }, { id: "ji_250_750_alt", name: "JI 250-750 (alt)", pitch: 250, bondingArea: 47, isManual: false }, { id: "ji_375_750", name: "JI 200-375-750", pitch: 375, bondingArea: 54, isManual: false }, { id: "manual_input", name: "Manual Input", pitch: null, bondingArea: null, isManual: true }],
+                bondingAreaUpliftData: [ { contactAreaPercent: 100, maxUpliftKN: 3.00 }, { contactAreaPercent: 99, maxUpliftKN: 2.99 }, { contactAreaPercent: 98, maxUpliftKN: 2.97 }, { contactAreaPercent: 97, maxUpliftKN: 2.96 }, { contactAreaPercent: 96, maxUpliftKN: 2.95 }, { contactAreaPercent: 95, maxUpliftKN: 2.95 }, { contactAreaPercent: 94, maxUpliftKN: 2.94 }, { contactAreaPercent: 93, maxUpliftKN: 2.93 }, { contactAreaPercent: 92, maxUpliftKN: 2.91 }, { contactAreaPercent: 91, maxUpliftKN: 2.90 }, { contactAreaPercent: 90, maxUpliftKN: 2.88 }, { contactAreaPercent: 89, maxUpliftKN: 2.86 }, { contactAreaPercent: 88, maxUpliftKN: 2.85 }, { contactAreaPercent: 87, maxUpliftKN: 2.83 }, { contactAreaPercent: 86, maxUpliftKN: 2.82 }, { contactAreaPercent: 85, maxUpliftKN: 2.80 }, { contactAreaPercent: 84, maxUpliftKN: 2.79 }, { contactAreaPercent: 83, maxUpliftKN: 2.77 }, { contactAreaPercent: 82, maxUpliftKN: 2.76 }, { contactAreaPercent: 81, maxUpliftKN: 2.74 }, { contactAreaPercent: 80, maxUpliftKN: 2.73 }, { contactAreaPercent: 79, maxUpliftKN: 2.73 }, { contactAreaPercent: 78, maxUpliftKN: 2.73 }, { contactAreaPercent: 77, maxUpliftKN: 2.72 }, { contactAreaPercent: 76, maxUpliftKN: 2.71 }, { contactAreaPercent: 75, maxUpliftKN: 2.70 }, { contactAreaPercent: 74, maxUpliftKN: 2.69 }, { contactAreaPercent: 73, maxUpliftKN: 2.68 }, { contactAreaPercent: 72, maxUpliftKN: 2.66 }, { contactAreaPercent: 71, maxUpliftKN: 2.65 }, { contactAreaPercent: 70, maxUpliftKN: 2.63 }, { contactAreaPercent: 69, maxUpliftKN: 2.62 }, { contactAreaPercent: 68, maxUpliftKN: 2.61 }, { contactAreaPercent: 67, maxUpliftKN: 2.60 }, { contactAreaPercent: 66, maxUpliftKN: 2.59 }, { contactAreaPercent: 65, maxUpliftKN: 2.57 }, { contactAreaPercent: 64, maxUpliftKN: 2.56 }, { contactAreaPercent: 63, maxUpliftKN: 2.54 }, { contactAreaPercent: 62, maxUpliftKN: 2.53 }, { contactAreaPercent: 61, maxUpliftKN: 2.51 }, { contactAreaPercent: 60, maxUpliftKN: 2.50 }, { contactAreaPercent: 59, maxUpliftKN: 2.49 }, { contactAreaPercent: 58, maxUpliftKN: 2.48 }, { contactAreaPercent: 57, maxUpliftKN: 2.46 }, { contactAreaPercent: 56, maxUpliftKN: 2.45 }, { contactAreaPercent: 55, maxUpliftKN: 2.43 }, { contactAreaPercent: 54, maxUpliftKN: 2.42 }, { contactAreaPercent: 53, maxUpliftKN: 2.40 }, { contactAreaPercent: 52, maxUpliftKN: 2.43 }, { contactAreaPercent: 51, maxUpliftKN: 2.41 }, { contactAreaPercent: 50, maxUpliftKN: 2.40 }, { contactAreaPercent: 49, maxUpliftKN: 2.36 }, { contactAreaPercent: 48, maxUpliftKN: 2.30 }, { contactAreaPercent: 47, maxUpliftKN: 2.25 }, { contactAreaPercent: 46, maxUpliftKN: 2.20 }, { contactAreaPercent: 45, maxUpliftKN: 2.15 }, { contactAreaPercent: 44, maxUpliftKN: 2.10 }, { contactAreaPercent: 43, maxUpliftKN: 2.05 }, { contactAreaPercent: 42, maxUpliftKN: 2.01 }, { contactAreaPercent: 41, maxUpliftKN: 1.96 }, { contactAreaPercent: 40, maxUpliftKN: 1.91 }, { contactAreaPercent: 39, maxUpliftKN: 1.91 }, { contactAreaPercent: 38, maxUpliftKN: 1.91 }, { contactAreaPercent: 37, maxUpliftKN: 1.81 }, { contactAreaPercent: 36, maxUpliftKN: 1.76 }, { contactAreaPercent: 35, maxUpliftKN: 1.71 }, { contactAreaPercent: 34, maxUpliftKN: 1.66 }, { contactAreaPercent: 33, maxUpliftKN: 1.62 }, { contactAreaPercent: 32, maxUpliftKN: 1.57 }, { contactAreaPercent: 31, maxUpliftKN: 1.52 }, { contactAreaPercent: 30, maxUpliftKN: 1.47 }, { contactAreaPercent: 29, maxUpliftKN: 1.42 }, { contactAreaPercent: 28, maxUpliftKN: 1.37 }, { contactAreaPercent: 27, maxUpliftKN: 1.32 }, { contactAreaPercent: 26, maxUpliftKN: 1.27 }, { contactAreaPercent: 25, maxUpliftKN: 1.22 }, { contactAreaPercent: 24, maxUpliftKN: 1.18 }, { contactAreaPercent: 23, maxUpliftKN: 1.13 }, { contactAreaPercent: 22, maxUpliftKN: 1.08 }, { contactAreaPercent: 21, maxUpliftKN: 1.03 }, { contactAreaPercent: 20, maxUpliftKN: 0.98 }, { contactAreaPercent: 19, maxUpliftKN: 0.93 }, { contactAreaPercent: 18, maxUpliftKN: 0.88 }, { contactAreaPercent: 17, maxUpliftKN: 0.83 }, { contactAreaPercent: 16, maxUpliftKN: 0.78 }, { contactAreaPercent: 15, maxUpliftKN: 0.73 }, { contactAreaPercent: 14, maxUpliftKN: 0.69 }, { contactAreaPercent: 13, maxUpliftKN: 0.64 }, { contactAreaPercent: 12, maxUpliftKN: 0.59 }, { contactAreaPercent: 11, maxUpliftKN: 0.54 }, { contactAreaPercent: 10, maxUpliftKN: 0.49 }, { contactAreaPercent: 9, maxUpliftKN: 0.44 }, { contactAreaPercent: 8, maxUpliftKN: 0.39 }, { contactAreaPercent: 7, maxUpliftKN: 0.34 }, { contactAreaPercent: 6, maxUpliftKN: 0.29 }, { contactAreaPercent: 5, maxUpliftKN: 0.24 }, { contactAreaPercent: 4, maxUpliftKN: 0.19 }, { contactAreaPercent: 3, maxUpliftKN: 0.15 }, { contactAreaPercent: 2, maxUpliftKN: 0.10 }, { contactAreaPercent: 1, maxUpliftKN: 0.05 }, { contactAreaPercent: 0, maxUpliftKN: 0.00 } ]
+            },
+            drainage: { // New section for drainage defaults
+                outletTypeData: [ // Data from drainage.html
+                    { id: "pvc_angled_63", name: "PVC angled 63", defaultFlow: 0.5, maxFlow: null, maxSump: null, sumpable: "N", leafguard: "No", spigotMm: 500, system: "Armourplan" },
+                    { id: "pvc_angled_75", name: "PVC angled 75", defaultFlow: 0.6, maxFlow: null, maxSump: null, sumpable: "N", leafguard: "No", spigotMm: 500, system: "Armourplan" },
+                    { id: "pvc_angled_90", name: "PVC angled 90", defaultFlow: 0.8, maxFlow: null, maxSump: null, sumpable: "N", leafguard: "No", spigotMm: 500, system: "Armourplan" },
+                    { id: "pvc_angled_110", name: "PVC angled 110", defaultFlow: 0.9, maxFlow: null, maxSump: null, sumpable: "N", leafguard: "No", spigotMm: 500, system: "Armourplan" },
+                    { id: "pvc_vertical_50", name: "PVC vertical 50*", defaultFlow: 1.1, maxFlow: null, maxSump: null, sumpable: "N", leafguard: "No", spigotMm: 320, system: "Armourplan" },
+                    { id: "pvc_vertical_56", name: "PVC vertical 56", defaultFlow: 1.2, maxFlow: null, maxSump: null, sumpable: "N", leafguard: "No", spigotMm: 320, system: "Armourplan" },
+                    { id: "pvc_vertical_63", name: "PVC vertical 63", defaultFlow: 1.6, maxFlow: null, maxSump: null, sumpable: "N", leafguard: "universal", spigotMm: 320, system: "Armourplan" },
+                    { id: "pvc_vertical_75", name: "PVC vertical 75*", defaultFlow: 4.0, maxFlow: null, maxSump: null, sumpable: "N", leafguard: "universal", spigotMm: 320, system: "Armourplan" },
+                    { id: "pvc_vertical_90", name: "PVC vertical 90*", defaultFlow: 5.3, maxFlow: 6.5, maxSump: 5, sumpable: "Y", leafguard: "universal", spigotMm: 320, system: "Armourplan" },
+                    { id: "pvc_vertical_95", name: "PVC vertical 95", defaultFlow: 2.7, maxFlow: null, maxSump: null, sumpable: "N", leafguard: "universal", spigotMm: 320, system: "Armourplan" },
+                    { id: "pvc_vertical_110", name: "PVC vertical 110*", defaultFlow: 5.6, maxFlow: 11.6, maxSump: 21, sumpable: "Y", leafguard: "universal", spigotMm: 320, system: "Armourplan" },
+                    { id: "pvc_vertical_125", name: "PVC vertical 125*", defaultFlow: 5.6, maxFlow: 16.7, maxSump: 34, sumpable: "Y", leafguard: "universal", spigotMm: 320, system: "Armourplan" },
+                    { id: "pvc_vertical_140", name: "PVC vertical 140.", defaultFlow: 3.9, maxFlow: null, maxSump: null, sumpable: "N", leafguard: "universal", spigotMm: 320, system: "Armourplan" },
+                    { id: "pvc_vertical_160", name: "PVC vertical 160*", defaultFlow: 5.7, maxFlow: 33.3, maxSump: 59, sumpable: "Y", leafguard: "universal", spigotMm: 320, system: "Armourplan" },
+                    { id: "pvc_180x80_scupper", name: "PVC 180x80 scupper", defaultFlow: 2.0, maxFlow: 33.3, maxSump: 74, sumpable: "Y", leafguard: "No", spigotMm: 600, system: "Armourplan" },
+                    { id: "pvc_300x100_scupper", name: "PVC 300x100 scupper", defaultFlow: 3.1, maxFlow: 33.3, maxSump: 46, sumpable: "Y", leafguard: "No", spigotMm: 600, system: "Armourplan" },
+                    { id: "pvc_refurb_63", name: "PVC refurb 63", defaultFlow: 1.2, maxFlow: null, maxSump: null, sumpable: "N", leafguard: "universal", spigotMm: 400, system: "Armourplan" },
+                    { id: "pvc_refurb_75", name: "PVC refurb 75", defaultFlow: 2.1, maxFlow: null, maxSump: null, sumpable: "N", leafguard: "universal", spigotMm: 400, system: "Armourplan" },
+                    { id: "pvc_refurb_90", name: "PVC refurb 90", defaultFlow: 2.5, maxFlow: null, maxSump: null, sumpable: "N", leafguard: "universal", spigotMm: 400, system: "Armourplan" },
+                    { id: "pvc_refurb_100", name: "PVC refurb 100", defaultFlow: 2.8, maxFlow: null, maxSump: null, sumpable: "N", leafguard: "universal", spigotMm: 400, system: "Armourplan" },
+                    { id: "pvc_refurb_110", name: "PVC refurb 110", defaultFlow: 3.0, maxFlow: null, maxSump: null, sumpable: "N", leafguard: "universal", spigotMm: 400, system: "Armourplan" },
+                    { id: "pvc_refurb_125", name: "PVC refurb 125", defaultFlow: 3.5, maxFlow: null, maxSump: null, sumpable: "N", leafguard: "universal", spigotMm: 400, system: "Armourplan" },
+                    { id: "pvc_refurb_160", name: "PVC refurb 160", defaultFlow: 4.1, maxFlow: null, maxSump: null, sumpable: "N", leafguard: "universal", spigotMm: 400, system: "Armourplan" },
+                    { id: "easy_flow_70", name: "Easy-Flow 70*", defaultFlow: 0.6, maxFlow: 4.1, maxSump: 110, sumpable: "Y", leafguard: "Integral", spigotMm: 1000, system: "Armourplan" },
+                    { id: "easy_flow_100", name: "EasyFlow 100*", defaultFlow: 0.8, maxFlow: 10.6, maxSump: 145, sumpable: "Y", leafguard: "Integral", spigotMm: 1000, system: "Armourplan" },
+                    { id: "trendy_70", name: "Trendy 70*", defaultFlow: 4.1, maxFlow: null, maxSump: null, sumpable: "N", leafguard: "Integral", spigotMm: 210, system: "Armourplan" },
+                    { id: "trendy_90", name: "Trendy 90*", defaultFlow: 6.3, maxFlow: 8.1, maxSump: 8, sumpable: "Y", leafguard: "Integral", spigotMm: 125, system: "Armourplan" },
+                    { id: "trendy_100", name: "Trendy 100*", defaultFlow: 6.2, maxFlow: 10.7, maxSump: 23, sumpable: "Y", leafguard: "Integral", spigotMm: 210, system: "Armourplan" },
+                    { id: "trendy_125", name: "Trendy 125*", defaultFlow: 6.3, maxFlow: 19.4, maxSump: 46, sumpable: "Y", leafguard: "Integral", spigotMm: 210, system: "Armourplan" },
+                    { id: "ss_vertical_70", name: "SS vertical 70", defaultFlow: null, maxFlow: null, maxSump: 78, sumpable: "Y", leafguard: "universal", spigotMm: 400, system: "Spectraplan" },
+                    { id: "ss_vertical_90", name: "SS vertical 90", defaultFlow: null, maxFlow: null, maxSump: 250, sumpable: "Y", leafguard: "universal", spigotMm: 400, system: "Spectraplan" },
+                    { id: "ss_vertical_110", name: "SS vertical 110", defaultFlow: null, maxFlow: null, maxSump: 517, sumpable: "Y", leafguard: "universal", spigotMm: 400, system: "Spectraplan" },
+                    { id: "ss_vertical_110_600", name: "SS vertical 110/600", defaultFlow: null, maxFlow: null, maxSump: 517, sumpable: "Y", leafguard: "universal", spigotMm: 600, system: "Spectraplan" },
+                    { id: "ss_vertical_125", name: "SS vertical 125", defaultFlow: null, maxFlow: null, maxSump: 390, sumpable: "Y", leafguard: "universal", spigotMm: 400, system: "Spectraplan" },
+                    { id: "ss_parapet_75", name: "SS parapet 75", defaultFlow: null, maxFlow: null, maxSump: 187, sumpable: "Y", leafguard: "No", spigotMm: 400, system: "Spectraplan" }
+                ]
+            }
+        };
+
+        function displayMessage(text, type = 'info') { /* ... Same ... */ 
+            messageArea.innerHTML = `<p class="${type}-message">${text}</p>`;
+            setTimeout(() => { if (messageArea.innerHTML.includes(text)) messageArea.innerHTML = ''; }, 5000);
+        }
+        function createInput(value, type = 'number', step = '0.01', readOnly = false, inputClass = 'setting-input', dataset = {}) {
+            const input = document.createElement('input');
+            input.type = type;
+            input.className = inputClass;
+            if (type === 'number') {
+                 input.value = (value === null || typeof value === 'undefined') ? '' : value;
+                 if (step) input.step = step;
+            } else { // text
+                input.value = value || '';
+            }
+            if (readOnly) input.readOnly = true;
+            for(const key in dataset) { input.dataset[key] = dataset[key]; }
+            return input;
+        }
+        
+        // --- Wind Uplift Settings Population ---
+        function populateWindUpliftForm(sourceData) {
+            // Populate CPE Table
+            cpeTableBody.innerHTML = '';
+            for (const key in sourceData.cpeByParapetRatio) { 
+                const rowData = sourceData.cpeByParapetRatio[key]; const row = cpeTableBody.insertRow();
+                row.insertCell().textContent = rowData.name;
+                ZONES.forEach(zone => { const cell = row.insertCell(); cell.classList.add('text-right-input'); cell.appendChild(createInput(rowData[zone], 'number', '0.01', false, 'setting-input', {cpeKey: key, zone: zone})); });
+            }
+            // Populate CPI Table
+            cpiTableBody.innerHTML = '';
+            for (const key in sourceData.internalPressureCoefficients) { 
+                const rowData = sourceData.internalPressureCoefficients[key]; const row = cpiTableBody.insertRow();
+                row.insertCell().textContent = rowData.name;
+                ZONES.forEach(zone => { const cell = row.insertCell(); cell.classList.add('text-right-input'); cell.appendChild(createInput(rowData.zones[zone], 'number', '0.01', false, 'setting-input', {cpiKey: key, zone: zone})); });
+            }
+            // Populate Deck Table
+            deckTableBody.innerHTML = '';
+            sourceData.structuralDeckData.forEach((deck, index) => {
+                if (deck.id === "manual_input") return; 
+                const row = deckTableBody.insertRow();
+                row.insertCell().appendChild(createInput(deck.name, 'text', null, false, 'setting-input deck-name-input', {deckId: deck.id, field: 'name'})).parentNode.classList.add('row-title');
+                row.insertCell().appendChild(createInput(deck.pitch, 'number', '0.1', false, 'setting-input', {deckId: deck.id, field: 'pitch'})).parentNode.classList.add('text-right-input');
+                row.insertCell().appendChild(createInput(deck.bondingArea, 'number', '1', false, 'setting-input', {deckId: deck.id, field: 'bondingArea'})).parentNode.classList.add('text-right-input');
+                row.insertCell().textContent = deck.isManual ? 'Yes' : 'No';
+            });
+            // Populate Bonding Area Uplift Table
+            bondingUpliftTableBody.innerHTML = '';
+            if (sourceData.bondingAreaUpliftData) {
+                sourceData.bondingAreaUpliftData.forEach((item, index) => {
+                    const row = bondingUpliftTableBody.insertRow();
+                    row.insertCell().textContent = item.contactAreaPercent + "%";
+                    row.insertCell().appendChild(createInput(item.maxUpliftKN, 'number', '0.01', false, 'setting-input', {bondingIndex: index})).parentNode.classList.add('text-right-input');
+                });
+            }
+        }
+
+        // --- Drainage Settings Population ---
+        function populateDrainageOutletTable(sourceData) {
+            drainageOutletTableBody.innerHTML = '';
+            if (sourceData && sourceData.outletTypeData) {
+                sourceData.outletTypeData.forEach((outlet, index) => {
+                    const row = drainageOutletTableBody.insertRow();
+                    // Name (Editable Text)
+                    row.insertCell().appendChild(createInput(outlet.name, 'text', null, false, 'setting-input text-input-medium', { outletId: outlet.id, field: 'name' })).parentNode.classList.add('row-title');
+                    // Default Flow (Editable Number)
+                    row.insertCell().appendChild(createInput(outlet.defaultFlow, 'number', '0.1', false, 'setting-input', { outletId: outlet.id, field: 'defaultFlow' })).parentNode.classList.add('text-right-input');
+                    // Max Flow (Editable Number)
+                    row.insertCell().appendChild(createInput(outlet.maxFlow, 'number', '0.1', false, 'setting-input', { outletId: outlet.id, field: 'maxFlow' })).parentNode.classList.add('text-right-input');
+                    // Max Sump (Editable Number)
+                    row.insertCell().appendChild(createInput(outlet.maxSump, 'number', '1', false, 'setting-input', { outletId: outlet.id, field: 'maxSump' })).parentNode.classList.add('text-right-input');
+                    // Sumpable (Editable Text Y/N)
+                    row.insertCell().appendChild(createInput(outlet.sumpable, 'text', null, false, 'setting-input text-input-small', { outletId: outlet.id, field: 'sumpable' })).parentNode.classList.add('text-right-input');
+                    // Leafguard (Editable Text)
+                    row.insertCell().appendChild(createInput(outlet.leafguard, 'text', null, false, 'setting-input text-input-small', { outletId: outlet.id, field: 'leafguard' })).parentNode.classList.add('text-right-input');
+                    // Spigot (Editable Number)
+                    row.insertCell().appendChild(createInput(outlet.spigotMm, 'number', '1', false, 'setting-input', { outletId: outlet.id, field: 'spigotMm' })).parentNode.classList.add('text-right-input');
+                    // System (Editable Text)
+                    row.insertCell().appendChild(createInput(outlet.system, 'text', null, false, 'setting-input text-input-medium', { outletId: outlet.id, field: 'system' })).parentNode.classList.add('text-right-input');
+                });
+            }
+        }
+
+
+        function loadAllSettingsFromSession() {
+            try {
+                // Load Wind Uplift Settings
+                const windStoredString = sessionStorage.getItem(WIND_SESSION_KEY);
+                if (windStoredString) {
+                    const stored = JSON.parse(windStoredString);
+                    // Basic validation before populating
+                    if (stored && stored.cpeByParapetRatio && stored.internalPressureCoefficients && stored.structuralDeckData && stored.bondingAreaUpliftData) {
+                         populateWindUpliftForm(stored);
+                    } else { populateWindUpliftForm(defaultGlobalAppSettings.windUplift); }
+                } else {
+                    populateWindUpliftForm(defaultGlobalAppSettings.windUplift);
+                }
+                // Load Drainage Settings
+                const drainageStoredString = sessionStorage.getItem(DRAINAGE_SESSION_KEY);
+                if (drainageStoredString) {
+                     const stored = JSON.parse(drainageStoredString);
+                     if (stored && stored.outletTypeData) { // Check for the expected key
+                        populateDrainageOutletTable(stored); // Pass the object that contains outletTypeData
+                     } else { populateDrainageOutletTable(defaultGlobalAppSettings.drainage); } // Pass the default drainage object
+                } else {
+                    populateDrainageOutletTable(defaultGlobalAppSettings.drainage);
+                }
+                 displayMessage('Settings loaded. Defaults are shown if no session data was found.', 'info');
+
+            } catch (e) {
+                console.error("Error loading settings from session storage:", e);
+                populateWindUpliftForm(defaultGlobalAppSettings.windUplift);
+                populateDrainageOutletTable(defaultGlobalAppSettings.drainage);
+                displayMessage('Error loading settings. Defaults have been applied.', 'error');
+            }
+        }
+
+        // --- Save Functions ---
+        saveWindButton.addEventListener('click', () => {
+            if (!confirm("You sure you know what powers you messing with? (Wind Uplift Settings)")) return displayMessage('Save cancelled.', 'info');
+            
+            const currentSettings = JSON.parse(JSON.stringify(defaultGlobalAppSettings.windUplift)); 
+            // Read CPE Table
+            cpeTableBody.querySelectorAll('input').forEach(input => { const key = input.dataset.cpeKey; const zone = input.dataset.zone; const value = parseFloat(input.value); if (!isNaN(value) && currentSettings.cpeByParapetRatio[key]) currentSettings.cpeByParapetRatio[key][zone] = value; else if (currentSettings.cpeByParapetRatio[key]) currentSettings.cpeByParapetRatio[key][zone] = defaultGlobalAppSettings.windUplift.cpeByParapetRatio[key][zone]; });
+            // Read CPI Table
+            cpiTableBody.querySelectorAll('input').forEach(input => { const key = input.dataset.cpiKey; const zone = input.dataset.zone; const value = parseFloat(input.value); if (!isNaN(value) && currentSettings.internalPressureCoefficients[key]) currentSettings.internalPressureCoefficients[key].zones[zone] = value; else if (currentSettings.internalPressureCoefficients[key]) currentSettings.internalPressureCoefficients[key].zones[zone] = defaultGlobalAppSettings.windUplift.internalPressureCoefficients[key].zones[zone]; });
+            // Read Deck Table
+            currentSettings.structuralDeckData.forEach((deckItem, defaultIndex) => {
+                if (deckItem.id === "manual_input") return;
+                const nameInput = deckTableBody.querySelector(`input[data-deck-id="${deckItem.id}"][data-field="name"]`);
+                const pitchInput = deckTableBody.querySelector(`input[data-deck-id="${deckItem.id}"][data-field="pitch"]`);
+                const bondingInput = deckTableBody.querySelector(`input[data-deck-id="${deckItem.id}"][data-field="bondingArea"]`);
+                if (nameInput) deckItem.name = nameInput.value;
+                const originalDefaultDeck = defaultGlobalAppSettings.windUplift.structuralDeckData.find(d => d.id === deckItem.id);
+                const pitchValue = parseFloat(pitchInput.value); deckItem.pitch = isNaN(pitchValue) ? (originalDefaultDeck ? originalDefaultDeck.pitch : null) : pitchValue;
+                const bondingValue = parseFloat(bondingInput.value); deckItem.bondingArea = isNaN(bondingValue) ? (originalDefaultDeck ? originalDefaultDeck.bondingArea : null) : bondingValue;
+            });
+            // Read Bonding Area Uplift Table
+            if (currentSettings.bondingAreaUpliftData) {
+                bondingUpliftTableBody.querySelectorAll('input').forEach(input => { const index = parseInt(input.dataset.bondingIndex); const value = parseFloat(input.value); if (!isNaN(value) && currentSettings.bondingAreaUpliftData[index]) currentSettings.bondingAreaUpliftData[index].maxUpliftKN = value; else if (currentSettings.bondingAreaUpliftData[index]) currentSettings.bondingAreaUpliftData[index].maxUpliftKN = defaultGlobalAppSettings.windUplift.bondingAreaUpliftData[index].maxUpliftKN; });
+            }
+            try { sessionStorage.setItem(WIND_SESSION_KEY, JSON.stringify(currentSettings)); displayMessage('Wind uplift settings saved to session!', 'success');
+            } catch (e) { console.error("Error saving wind settings:", e); displayMessage('Could not save wind settings.', 'error'); }
+        });
+
+        saveDrainageButton.addEventListener('click', () => {
+            if (!confirm("You sure you know what powers you messing with? (Drainage Settings)")) return displayMessage('Save cancelled.', 'info');
+
+            const newOutletData = [];
+            drainageOutletTableBody.querySelectorAll('tr').forEach((row, index) => {
+                const originalOutlet = defaultGlobalAppSettings.drainage.outletTypeData.find(o => o.id === row.querySelector('input[data-field="name"]').dataset.outletId) || defaultGlobalAppSettings.drainage.outletTypeData[index]; // Fallback to index if ID somehow missing
+                
+                const outlet = { id: originalOutlet.id }; // Preserve original ID
+                outlet.name = row.querySelector('input[data-field="name"]').value;
+                
+                const df = parseFloat(row.querySelector('input[data-field="defaultFlow"]').value);
+                outlet.defaultFlow = isNaN(df) ? null : df;
+                
+                const mf = parseFloat(row.querySelector('input[data-field="maxFlow"]').value);
+                outlet.maxFlow = isNaN(mf) ? null : mf;
+
+                const ms = parseFloat(row.querySelector('input[data-field="maxSump"]').value);
+                outlet.maxSump = isNaN(ms) ? null : ms;
+
+                outlet.sumpable = row.querySelector('input[data-field="sumpable"]').value;
+                outlet.leafguard = row.querySelector('input[data-field="leafguard"]').value;
+                
+                const sp = parseFloat(row.querySelector('input[data-field="spigotMm"]').value);
+                outlet.spigotMm = isNaN(sp) ? null : sp;
+
+                outlet.system = row.querySelector('input[data-field="system"]').value;
+                newOutletData.push(outlet);
+            });
+
+            try {
+                sessionStorage.setItem(DRAINAGE_SESSION_KEY, JSON.stringify({ outletTypeData: newOutletData }));
+                displayMessage('Drainage outlet settings saved to session!', 'success');
+            } catch (e) {
+                console.error("Error saving drainage settings:", e);
+                displayMessage('Could not save drainage settings.', 'error');
+            }
+        });
+
+
+        // --- Restore Defaults Functions ---
+        restoreWindButton.addEventListener('click', () => {
+            if (confirm("Restore Wind Uplift settings to defaults on this form? Unsaved changes will be lost.")) {
+                populateWindUpliftForm(defaultGlobalAppSettings.windUplift);
+                displayMessage('Wind uplift settings on form restored to defaults. Click "Save" to apply to session.', 'info');
+            }
+        });
+
+        restoreDrainageButton.addEventListener('click', () => {
+             if (confirm("Restore Drainage Outlet settings to defaults on this form? Unsaved changes will be lost.")) {
+                populateDrainageOutletTable(defaultGlobalAppSettings.drainage);
+                displayMessage('Drainage outlet settings on form restored to defaults. Click "Save" to apply to session.', 'info');
+            }
+        });
+
+        // Initial load
+        loadAllSettingsFromSession();
+    });
+    </script>
+</body>
+</html>

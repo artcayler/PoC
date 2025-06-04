@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Setup - Polytec Tools</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* bg-gray-100 */
+        }
+        .breadcrumb-link { color: #4f46e5; text-decoration: none; }
+        .breadcrumb-link:hover { text-decoration: underline; }
+        .back-to-tools-btn {
+            padding: 0.5rem 1rem; background-color: #64748b; color: white;
+            border-radius: 0.375rem; text-decoration: none; transition: background-color 0.3s ease;
+            font-weight: 500;
+        }
+        .back-to-tools-btn:hover { background-color: #475569; }
+        .form-container {
+            background-color: white; padding: 2rem; border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+        }
+        .form-input, .form-select {
+            width: 100%; padding: 0.65rem 0.75rem; border: 1px solid #d1d5db;
+            border-radius: 0.375rem; box-shadow: inset 0 1px 2px 0 rgba(0,0,0,0.05);
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+        .form-input:focus, .form-select:focus {
+            border-color: #4f46e5; outline: none;
+            box-shadow: 0 0 0 0.2rem rgba(79, 70, 229, 0.25);
+        }
+        .form-label {
+            display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;
+        }
+        .form-section { margin-bottom: 1.5rem; }
+        .form-subsection-title {
+            font-size: 1.1rem; font-weight: 600; color: #4b5563; /* gray-600 */
+            margin-top: 1.5rem; margin-bottom: 1rem; padding-bottom: 0.25rem;
+            border-bottom: 1px solid #e5e7eb; /* gray-200 */
+        }
+        .action-btn {
+            font-weight: 600; padding: 0.6rem 1.2rem; border-radius: 0.375rem;
+            transition: background-color 0.3s, border-color 0.3s;
+            border: 1px solid transparent; cursor: pointer; margin-right: 0.5rem; margin-bottom: 0.5rem;
+        }
+        .save-btn { background-color: #4f46e5; color: white; }
+        .save-btn:hover { background-color: #4338ca; }
+        .clear-btn { background-color: #ef4444; color: white; }
+        .clear-btn:hover { background-color: #dc2626; }
+        .message-area {
+            margin-top: 1.5rem; padding: 0.75rem 1rem; border-radius: 0.375rem;
+            font-size: 0.9rem; min-height: 40px;
+        }
+        .success-message { background-color: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
+        .error-message { background-color: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+        .info-message { background-color: #e0e7ff; color: #3730a3; border: 1px solid #a5b4fc; }
+        .field-note { font-size: 0.75rem; color: #6b7280; margin-top: 0.25rem; }
+        .sf-ref-note { display: none; color: #c2410c; /* orange-700 */ } /* Hidden by default */
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <header class="bg-gray-800 text-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <a href="index.html" class="text-xl font-bold hover:text-indigo-300">Polytec Hub</a>
+            <nav aria-label="Breadcrumb" class="hidden sm:inline-flex">
+                <ol class="list-none p-0 inline-flex text-sm">
+                    <li class="flex items-center"><a href="index.html" class="breadcrumb-link hover:text-indigo-200">Portal</a><svg class="fill-current w-3 h-3 mx-2 text-gray-500" viewBox="0 0 20 20"><path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"/></svg></li>
+                    <li class="flex items-center"><a href="tools.html" class="breadcrumb-link hover:text-indigo-200">Tools Section</a><svg class="fill-current w-3 h-3 mx-2 text-gray-500" viewBox="0 0 20 20"><path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"/></svg></li>
+                    <li class="flex items-center"><span class="text-gray-400">Project Setup</span></li>
+                </ol>
+            </nav>
+            <a href="tools.html" class="back-to-tools-btn text-sm">&larr; All Tools</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8 flex-grow">
+        <div class="form-container max-w-3xl mx-auto"> <h1 class="text-3xl font-bold text-gray-800 mb-2 text-center">Project Setup & Details</h1>
+            <p class="text-center text-gray-600 mb-8">
+                Enter your project's information. Fields marked with <span class="text-red-500 font-bold">*</span> are required to save.
+            </p>
+
+            <form id="projectDataForm" class="space-y-4">
+                <div class="form-section">
+                    <label for="projectSFRef" class="form-label">Project SF Reference <span class="text-red-500 font-bold">*</span></label>
+                    <input type="text" id="projectSFRef" name="projectSFRef" class="form-input"
+                           maxlength="7" placeholder="e.g., 0123456 or CHECK" required>
+                    <small class="field-note">Must be 7 digits or type 'CHECK'.</small>
+                    <small id="sfRefErrorNote" class="field-note sf-ref-note">Invalid SF Reference. Must be 7 digits, or type 'CHECK' to proceed without a valid reference.</small>
+                </div>
+
+                <div class="form-section">
+                    <label for="projectName" class="form-label">Project Name <span class="text-red-500 font-bold">*</span></label>
+                    <input type="text" id="projectName" name="projectName" class="form-input"
+                           maxlength="128" placeholder="Enter project name" required>
+                </div>
+
+                <fieldset class="border border-gray-300 p-4 rounded-md">
+                    <legend class="form-subsection-title px-2">Project Address</legend>
+                    <div class="form-section">
+                        <label for="projectStreet" class="form-label">Street <span class="text-red-500 font-bold">*</span></label>
+                        <input type="text" id="projectStreet" name="projectStreet" class="form-input" placeholder="e.g., 123 Main Street" required>
+                    </div>
+                    <div class="form-section">
+                        <label for="projectTown" class="form-label">Town/City <span class="text-red-500 font-bold">*</span></label>
+                        <input type="text" id="projectTown" name="projectTown" class="form-input" placeholder="e.g., Anytown" required>
+                    </div>
+                    <div class="form-section">
+                        <label for="projectPostcode" class="form-label">Postcode <span class="text-red-500 font-bold">*</span></label>
+                        <input type="text" id="projectPostcode" name="projectPostcode" class="form-input" placeholder="e.g., AB1 2CD" required>
+                    </div>
+                </fieldset>
+
+                <fieldset class="border border-gray-300 p-4 rounded-md mt-6">
+                    <legend class="form-subsection-title px-2">Project Admin</legend>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6">
+                        <div class="form-section">
+                            <label for="projectGuarantee" class="form-label">Guarantee:</label>
+                            <select id="projectGuarantee" name="projectGuarantee" class="form-select">
+                                <option value="">Select Guarantee...</option>
+                                <option value="10 Year - Standard">10 Year - Standard</option>
+                                <option value="15 Year - Enhanced">15 Year - Enhanced</option>
+                                <option value="20 Year - Premium">20 Year - Premium</option>
+                                <option value="None">None</option>
+                            </select>
+                        </div>
+                        <div class="form-section">
+                            <label for="projectABM" class="form-label">ABM (Area Business Manager):</label>
+                            <select id="projectABM" name="projectABM" class="form-select">
+                                <option value="">Select ABM...</option>
+                                <option value="John Doe">John Doe</option>
+                                <option value="Jane Smith">Jane Smith</option>
+                                <option value="Peter Jones">Peter Jones</option>
+                                <option value="Unassigned">Unassigned</option>
+                            </select>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <fieldset class="border border-gray-300 p-4 rounded-md mt-6">
+                    <legend class="form-subsection-title px-2">Contractor Details</legend>
+                    <div class="form-section">
+                        <label for="contractorName" class="form-label">Contractor Name:</label>
+                        <input type="text" id="contractorName" name="contractorName" class="form-input" placeholder="Contractor company name">
+                    </div>
+                    <h4 class="form-subsection-title text-sm mt-4 mb-2 !border-0">Contractor Address</h4>
+                    <div class="form-section">
+                        <label for="contractorStreet" class="form-label">Street:</label>
+                        <input type="text" id="contractorStreet" name="contractorStreet" class="form-input">
+                    </div>
+                    <div class="form-section">
+                        <label for="contractorTown" class="form-label">Town/City:</label>
+                        <input type="text" id="contractorTown" name="contractorTown" class="form-input">
+                    </div>
+                    <div class="form-section">
+                        <label for="contractorPostcode" class="form-label">Postcode:</label>
+                        <input type="text" id="contractorPostcode" name="contractorPostcode" class="form-input">
+                    </div>
+                </fieldset>
+                
+                <div class="flex flex-wrap items-center pt-6 border-t border-gray-200 mt-6">
+                    <button type="submit" id="saveProjectData" class="action-btn save-btn">Save to Session</button>
+                    <button type="button" id="clearProjectData" class="action-btn clear-btn">Clear Form & Session</button>
+                </div>
+            </form>
+            <div id="projectMessage" class="message-area" role="alert" aria-live="polite"></div>
+        </div>
+    </main>
+
+    <footer class="bg-gray-700 text-gray-300 text-center p-4 mt-auto">
+        <p>&copy; <span id="currentYear"></span> Cayler. All rights reserved.</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const currentYearSpan = document.getElementById('currentYear');
+            if (currentYearSpan) currentYearSpan.textContent = new Date().getFullYear();
+
+            const projectForm = document.getElementById('projectDataForm');
+            const messageArea = document.getElementById('projectMessage');
+            const saveButton = document.getElementById('saveProjectData');
+            const clearButton = document.getElementById('clearProjectData');
+            
+            const sfRefInput = document.getElementById('projectSFRef');
+            const sfRefErrorNote = document.getElementById('sfRefErrorNote');
+
+            const SESSION_STORAGE_KEY = 'currentProjectData';
+
+            // Helper to get/set nested properties safely
+            const getNested = (obj, path, defaultValue = '') => {
+                const value = path.split('.').reduce((acc, part) => acc && acc[part], obj);
+                return typeof value === 'undefined' || value === null ? defaultValue : value;
+            };
+            const setNested = (obj, path, value) => {
+                path.split('.').reduce((acc, part, index, arr) => {
+                    if (index === arr.length - 1) {
+                        acc[part] = value;
+                    } else {
+                        acc[part] = acc[part] || {};
+                    }
+                    return acc[part];
+                }, obj);
+            };
+
+
+            function displayMessage(text, type = 'info') {
+                messageArea.innerHTML = `<p class="${type}-message">${text}</p>`;
+                 setTimeout(() => { // Auto-clear message after a delay
+                    if (messageArea.innerHTML.includes(text)) {
+                         messageArea.innerHTML = '';
+                    }
+                 }, 5000);
+            }
+
+            function loadDataFromSession() {
+                try {
+                    const storedDataString = sessionStorage.getItem(SESSION_STORAGE_KEY);
+                    if (storedDataString) {
+                        const storedData = JSON.parse(storedDataString);
+                        
+                        projectForm.projectSFRef.value = getNested(storedData, 'projectSFRef');
+                        projectForm.projectName.value = getNested(storedData, 'projectName');
+                        
+                        projectForm.projectStreet.value = getNested(storedData, 'projectAddress.street');
+                        projectForm.projectTown.value = getNested(storedData, 'projectAddress.town');
+                        projectForm.projectPostcode.value = getNested(storedData, 'projectAddress.postcode');
+                        
+                        projectForm.projectGuarantee.value = getNested(storedData, 'projectAdmin.guarantee');
+                        projectForm.projectABM.value = getNested(storedData, 'projectAdmin.abm');
+                        
+                        projectForm.contractorName.value = getNested(storedData, 'contractor.name');
+                        projectForm.contractorStreet.value = getNested(storedData, 'contractor.address.street');
+                        projectForm.contractorTown.value = getNested(storedData, 'contractor.address.town');
+                        projectForm.contractorPostcode.value = getNested(storedData, 'contractor.address.postcode');
+                        
+                        // displayMessage('Project data loaded from session.', 'info'); // Optional: message on load
+                    }
+                } catch (e) {
+                    console.error("Error loading data from session storage:", e);
+                    displayMessage('Error loading data from session. Please re-enter.', 'error');
+                }
+            }
+            
+            function validateSFRef() {
+                const sfValue = sfRefInput.value.trim();
+                const isValidNumeric = /^[0-9]{7}$/.test(sfValue);
+                const isCheckOverride = sfValue.toUpperCase() === 'CHECK';
+
+                if (isValidNumeric || isCheckOverride) {
+                    sfRefErrorNote.style.display = 'none';
+                    return true;
+                } else {
+                    sfRefErrorNote.style.display = 'block';
+                    return false;
+                }
+            }
+            sfRefInput.addEventListener('input', validateSFRef); // Validate on input change
+
+            saveButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                let allValid = true;
+                let firstInvalidField = null;
+
+                // Check SF Ref
+                if (!validateSFRef()) {
+                    allValid = false;
+                    if (!firstInvalidField) firstInvalidField = sfRefInput;
+                }
+                
+                // Check other required fields
+                const requiredFields = [
+                    projectForm.projectName, projectForm.projectStreet,
+                    projectForm.projectTown, projectForm.projectPostcode
+                ];
+
+                requiredFields.forEach(field => {
+                    if (!field.value.trim()) {
+                        allValid = false;
+                        field.style.borderColor = '#ef4444'; // Highlight empty required field
+                        if (!firstInvalidField) firstInvalidField = field;
+                    } else {
+                        field.style.borderColor = ''; // Reset border
+                    }
+                });
+
+                if (!allValid) {
+                    displayMessage('Please fill in all required fields marked with * and ensure SF Reference is valid or "CHECK".', 'error');
+                    firstInvalidField?.focus();
+                    return;
+                }
+
+                // Reset all borders if valid
+                requiredFields.forEach(field => field.style.borderColor = '');
+                sfRefInput.style.borderColor = '';
+
+
+                const projectData = {
+                    projectSFRef: projectForm.projectSFRef.value.trim(),
+                    projectName: projectForm.projectName.value.trim(),
+                    projectAddress: {
+                        street: projectForm.projectStreet.value.trim(),
+                        town: projectForm.projectTown.value.trim(),
+                        postcode: projectForm.projectPostcode.value.trim()
+                    },
+                    projectAdmin: {
+                        guarantee: projectForm.projectGuarantee.value,
+                        abm: projectForm.projectABM.value
+                    },
+                    contractor: {
+                        name: projectForm.contractorName.value.trim(),
+                        address: {
+                            street: projectForm.contractorStreet.value.trim(),
+                            town: projectForm.contractorTown.value.trim(),
+                            postcode: projectForm.contractorPostcode.value.trim()
+                        }
+                    }
+                };
+
+                try {
+                    sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(projectData));
+                    displayMessage('Project data saved to current session successfully!', 'success');
+                } catch (err) {
+                    console.error("Error saving data to session storage:", err);
+                    displayMessage('Could not save data. Storage might be full or unavailable.', 'error');
+                }
+            });
+
+            clearButton.addEventListener('click', () => {
+                projectForm.reset();
+                // Reset any visual validation states
+                sfRefErrorNote.style.display = 'none';
+                const fieldsToResetBorder = [
+                    projectForm.projectName, projectForm.projectStreet,
+                    projectForm.projectTown, projectForm.projectPostcode, projectForm.projectSFRef
+                ];
+                fieldsToResetBorder.forEach(field => field.style.borderColor = '');
+
+                sessionStorage.removeItem(SESSION_STORAGE_KEY);
+                displayMessage('Project data cleared from form and session.', 'info');
+            });
+
+            loadDataFromSession();
+        });
+    </script>
+</body>
+</html>
